@@ -1,0 +1,31 @@
+[package]
+name = "neocities-deploy"
+description = "A command-line tool for deploying your Neocities site"
+authors.workspace = true
+license.workspace = true
+edition.workspace = true
+version.workspace = true
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+anyhow = "1.0.72"
+bytesize = "1.3.0"
+clap = { version = "4.3.16", features = ["derive"] }
+derive_more = "0.99.17"
+directories = "5.0.1"
+ignore = "0.4.20"
+indexmap = { version = "2.0.0", features = ["serde"] }
+inquire = "0.7.0"
+itertools = "0.11.0"
+log = "0.4.19"
+neocities-client = { version = "0.1.0", path = "../neocities-client" }
+pretty_env_logger = "0.5.0"
+serde = { version = "1.0.166", features = ["derive"] }
+sha1 = "0.10.5"
+toml = { version = "0.7.6", features = ["preserve_order"] }
+ureq = "2.7.1"
+url = "2.5.0"
+
+[dev-dependencies]
+tempfile = "3.10.1"

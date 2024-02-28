@@ -1,0 +1,12 @@
+
+[workspace]
+package.license = "GPL-3.0"
+package.authors = ["André Kugland <kugland@gmail.com>"]
+package.edition = "2021"
+package.version = "0.1.0"
+members = ["crates/*"]
+resolver = "2"
+[profile.dev]
+split-debuginfo = "unpacked"
+[profile.release]
+opt-level = "z"
