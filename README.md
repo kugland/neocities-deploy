@@ -1,10 +1,13 @@
 # neocities-deploy
 
-*neocities-deploy* is a command-line tool for deploying your Neocities site. It can upload files to
-your site, list remote files, and more.
+*neocities-deploy* is a command-line tool for deploying your Neocities site.
+It can upload files to your site, list remote files, and more.
 
-This project is in no way affiliated with Neocities. It is a personal project and is not endorsed
-by Neocities.
+Also part of this project is a Rust library for interacting with the Neocities
+API, [*neocities-client*](https://github.com/kugland/neocities-client).
+
+This project is in no way affiliated with Neocities. It is a personal project
+and is not endorsed by Neocities.
 
 Repo mirrors at [Codeberg](https://codeberg.org/kugland/neocities-deploy) and
 [GitHub](https://github.com/kugland/neocities-deploy).
@@ -41,8 +44,9 @@ Repo mirrors at [Codeberg](https://codeberg.org/kugland/neocities-deploy) and
 
 ## Configuration
 
-The configuration file is a TOML file. It should be located at `~/.config/neocities-deploy/config.toml`.
-A configuration file might look like this:
+The configuration file is a TOML file. It should be located at
+`~/.config/neocities-deploy/config.toml`. A configuration file might look like
+this:
 
 ```toml
 [sites."site1"]
@@ -59,19 +63,20 @@ proxy = "http://localhost:8081"
 
 * Only the fields `auth` and `path` are required.
 
-* The `auth` field can be either a username:password pair or an API key. If it contains a colon,
-it’s assumed to be a username:password pair.
+* The `auth` field can be either a username:password pair or an API key. If it
+contains a colon, it’s assumed to be a username:password pair.
 
-* Setting `free_account` to `true` will make the tool to ignore file with extensions not allowed
-in free accounts when deploying.
+* Setting `free_account` to `true` will make the tool to ignore file with
+extensions not allowed in free accounts when deploying.
 
 ## .neocitiesignore
 
-The `.neocitiesignore` file is a text file that specifies files and directories that will be
-ignored when deploying. It has the same syntax as `.gitignore` and works similarly to it: each
-`.neocitiesignore` file applies to the directory in which it resides and all its subdirectories.
+The `.neocitiesignore` file is a text file that specifies files and directories
+that will be ignored when deploying. It has the same syntax as `.gitignore` and
+works similarly to it: each `.neocitiesignore` file applies to the directory in
+which it resides and all its subdirectories.
 
 ## License
 
-This project is licensed under the GNU General Public License v3.0. See the [LICENSE](LICENSE) file
-for details.
+This project is licensed under the GNU General Public License v3.0. See the
+[LICENSE](LICENSE) file for details.
