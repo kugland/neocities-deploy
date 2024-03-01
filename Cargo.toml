@@ -16,7 +16,7 @@ clap = { version = "4.3.16", features = ["derive"] }
 derive_more = "0.99.17"
 directories = "5.0.1"
 ignore = "0.4.20"
-indexmap = { version = "2.0.0", features = ["serde"] }
+indexmap = { version = "2.2.5", features = ["serde"] }
 inquire = "0.7.0"
 itertools = "0.11.0"
 log = "0.4.19"
