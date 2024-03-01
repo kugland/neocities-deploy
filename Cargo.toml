@@ -4,7 +4,7 @@ package.edition = "2021"
 package.homepage = "https://github.com/kugland/neocities-deploy"
 package.license = "GPL-3.0"
 package.repository = "https://github.com/kugland/neocities-deploy"
-package.version = "0.1.0"
+package.version = "0.1.1"
 members = ["crates/*"]
 resolver = "2"
 
