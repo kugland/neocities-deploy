@@ -6,7 +6,7 @@ your site, list remote files, and more.
 This project is in no way affiliated with Neocities. It is a personal project and is not endorsed
 by Neocities.
 
-Mirrors of this repository: [Codeberg](https://codeberg.org/kugland/neocities-deploy) &
+Repo mirrors at [Codeberg](https://codeberg.org/kugland/neocities-deploy) and
 [GitHub](https://github.com/kugland/neocities-deploy).
 
 ## Usage

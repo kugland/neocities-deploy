@@ -1,8 +1,15 @@
 # neocities-client
 
 This is a Rust library for interacting with the [Neocities](https://neocities.org/) API.
-It is part of the **neocities-deploy** project, a command-line tool for deploying a NeoCities
+It is part of the [**neocities-deploy**](https://github.com/kugland/neocities-deploy) project, a
+command-line tool for deploying a NeoCities
 site.
+
+This project *is in no way affiliated with Neocities*. It is a personal project and is not endorsed
+by Neocities.
+
+Repo mirrors at [Codeberg](https://codeberg.org/kugland/neocities-deploy) and
+[GitHub](https://github.com/kugland/neocities-deploy).
 
 ## Usage
 
