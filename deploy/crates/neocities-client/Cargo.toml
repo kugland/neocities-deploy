@@ -1,11 +1,12 @@
 [package]
 name = "neocities-client"
-version.workspace = true
+description = "Another client for the Neocities API"
 authors.workspace = true
-license.workspace = true
 edition.workspace = true
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+homepage.workspace = true
+license.workspace = true
+repository.workspace = true
+version.workspace = true
 
 [dependencies]
 base64 = "0.21.7"
