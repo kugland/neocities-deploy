@@ -1,4 +1,4 @@
-name: Release
+name: Tags in the form of v* become releases, build artifacts and create a draft release
 
 on:
   push:
