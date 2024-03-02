@@ -21,5 +21,3 @@ jobs:
         uses: Swatinem/rust-cache@v2.7.3
       - name: Run cargo publish
         run: cargo publish --token=${{ secrets.CRATES_IO_TOKEN }}
-        env:
-          CRATES_IO_TOKEN: ${{ secrets.CRATES_IO_TOKEN }}
