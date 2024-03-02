@@ -1,5 +1,7 @@
 # neocities-deploy
 
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/kugland/neocities-deploy/.github%2Fworkflows%2Fbuild-and-test.yml) ![License](https://img.shields.io/github/license/kugland/neocities-deploy)
+
 **neocities-deploy** is a command-line tool for deploying your Neocities site.
 It can upload files to your site, list remote files, and more.
 
