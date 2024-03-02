@@ -702,9 +702,9 @@ dependencies = [
 
 [[package]]
 name = "neocities-client"
-version = "0.1.7"
+version = "0.1.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "794afa635faa3ba7199524f00ac880533cc30289f5dab5f935caf1cc4a44172f"
+checksum = "1bd62bfe1a67fd2f9b944d7a57d151f68ed0a2f961e495119cf252a2e3ee6bea"
 dependencies = [
  "base64 0.21.7",
  "derive_builder",
