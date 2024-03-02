@@ -24,9 +24,3 @@ ureq = "2.9.6"
 
 [dev-dependencies]
 mockito = "1.4.0"
-
-[profile.dev]
-split-debuginfo = "unpacked"
-
-[profile.release]
-opt-level = "z"
