@@ -17,6 +17,8 @@ jobs:
         with:
             toolchain: stable
             override: true
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@v2.7.3
       - name: Run cargo publish
         run: cargo publish --token=${{ secrets.CRATES_IO_TOKEN }}
         env:
