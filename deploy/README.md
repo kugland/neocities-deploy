@@ -20,8 +20,7 @@
 It can upload files to your site, list remote files, and more.
 
 Also part of this project is a Rust library for interacting with the Neocities
-API, **neocities-client**.<sup>[(Codeberg)](https://codeberg.org/kugland/neocities-client),
-[(GitHub)](https://github.com/kugland/neocities-client)</sup>
+API, **neocities-client**.
 
 This project *is in no way affiliated with Neocities*. It is a personal project
 and is not endorsed by Neocities.
