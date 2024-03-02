@@ -2,17 +2,29 @@
 
 ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/kugland/neocities-deploy/.github%2Fworkflows%2Fbuild-and-test.yml) ![License](https://img.shields.io/github/license/kugland/neocities-deploy)
 
+---
+
+**neocities-deploy** •
+[@codeberg](https://codeberg.org/kugland/neocities-deploy) |
+[@github](https://github.com/kugland/neocities-deploy)
+
+**neocities-client** •
+[@codeberg](https://codeberg.org/kugland/neocities-client) |
+[@github](https://github.com/kugland/neocities-client) |
+[@crates.io](https://crates.io/crates/neocities-client) |
+[@docs.rs](https://docs.rs/neocities-client)
+
+---
+
 **neocities-deploy** is a command-line tool for deploying your Neocities site.
 It can upload files to your site, list remote files, and more.
 
 Also part of this project is a Rust library for interacting with the Neocities
-API, [**neocities-client**](https://github.com/kugland/neocities-client).
+API, **neocities-client**.<sup>[(Codeberg)](https://codeberg.org/kugland/neocities-client),
+[(GitHub)](https://github.com/kugland/neocities-client)</sup>
 
 This project *is in no way affiliated with Neocities*. It is a personal project
 and is not endorsed by Neocities.
-
-Repo mirrors at [Codeberg](https://codeberg.org/kugland/neocities-deploy) and
-[GitHub](https://github.com/kugland/neocities-deploy).
 
 ## Usage
 
