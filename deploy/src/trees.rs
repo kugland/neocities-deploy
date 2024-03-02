@@ -69,7 +69,7 @@ impl Entry {
         } else {
             path
         };
-        let local_path = Some(local_path.canonicalize()?.to_owned());
+        let local_path = Some(local_path.canonicalize()?);
         let metadata = entry.metadata()?;
         let info = if !metadata.is_dir() {
             let size = metadata.len();
@@ -196,7 +196,7 @@ mod tests {
             tree.iter().map(|e| e.local_path.clone().unwrap()),
             ["empty", "hello", "hello.txt", "subdir", "subdir/goodbye"]
                 .iter()
-                .map(|e| root.path().join(e)),
+                .map(|e| root.path().canonicalize().unwrap().join(e)),
         );
         root.close().unwrap();
     }
