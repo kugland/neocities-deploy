@@ -1,9 +1,6 @@
 # neocities-client
 
-This is a Rust library for interacting with the [Neocities](https://neocities.org/) API.
-It is part of the [**neocities-deploy**](https://github.com/kugland/neocities-deploy) project, a
-command-line tool for deploying a NeoCities
-site.
+![Crates.io Version](https://img.shields.io/crates/v/neocities-client) ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/kugland/neocities-client/.github%2Fworkflows%2Fbuild-and-test.yml) ![License](https://img.shields.io/github/license/kugland/neocities-client)
 
 This project *is in no way affiliated with Neocities*. It is a personal project and is not endorsed
 by Neocities.
