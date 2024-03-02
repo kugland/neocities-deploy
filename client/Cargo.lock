@@ -470,7 +470,7 @@ dependencies = [
 
 [[package]]
 name = "neocities-client"
-version = "0.1.4"
+version = "0.1.5"
 dependencies = [
  "base64 0.21.7",
  "derive_builder",
