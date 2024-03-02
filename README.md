@@ -2,14 +2,18 @@
 
 ![Crates.io Version](https://img.shields.io/crates/v/neocities-client) ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/kugland/neocities-client/.github%2Fworkflows%2Fbuild-and-test.yml) ![License](https://img.shields.io/github/license/kugland/neocities-client)
 
-This project *is in no way affiliated with Neocities*. It is a personal project and is not endorsed
-by Neocities.
+This is a Rust library for interacting with the [Neocities](https://neocities.org/)
+API. It is part of the [**neocities-deploy**](https://github.com/kugland/neocities-deploy)
+project, a command-line tool for deploying a NeoCities site.
+
+This project *is in no way affiliated with Neocities*. It is a personal project
+and is not endorsed by Neocities.
 
 ## Usage
 
-The `Client` struct provides a simple interface for interacting with the website API. To use it,
-first create a new instance of the `Client` struct (replace `"username:password"` with your actual
-username and password):
+The `Client` struct provides a simple interface for interacting with the
+website API. To use it, first create a new instance of the `Client` struct
+(replace `"username:password"` with your actual username and password):
 
 ```rust
 let client = Client::builder()
@@ -17,12 +21,13 @@ let client = Client::builder()
     .build()?;
 ```
 
-Once you have a `Client` instance, you can use its methods to interact with the website API. For
-example, to create an API key (which can be later used to authenticate with the API without
-providing your username and password):
+Once you have a `Client` instance, you can use its methods to interact with the
+website API. For example, to create an API key (which can be later used to
+authenticate with the API without providing your username and password):
 
 ```rust
 let api_key = client.key()?;
+println!("API key: {}", api_key);
 ```
 
 Or to get more information about the website:
@@ -56,9 +61,10 @@ To delete one or more files from the website:
 client.delete(&["file1.txt", "file2.txt"])?;
 ```
 
-For more information on the available methods, see the documentation for the `Client` struct.
+For more information on the available methods, see the documentation for the
+`Client` struct.
 
 ## License
 
-This project is licensed under the GNU General Public License v3.0. See the [LICENSE](LICENSE) file
-for details.
+This project is licensed under the GNU General Public License v3.0. See the
+[LICENSE](LICENSE) file for details.
