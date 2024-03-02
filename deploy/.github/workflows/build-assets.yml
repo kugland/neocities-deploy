@@ -7,7 +7,7 @@ on:
 
 jobs:
   build-assets:
-    name: Building assets - ${{ matrix.platform.release_for }}
+    name: Building ${{ matrix.platform.name }}
     strategy:
       matrix:
         platform:
