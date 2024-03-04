@@ -89,6 +89,60 @@ that will be ignored when deploying. It has the same syntax as `.gitignore` and
 works similarly to it: each `.neocitiesignore` file applies to the directory in
 which it resides and all its subdirectories.
 
+## Installation
+
+### Windows
+
+It would be best not to use Windows, but if you must, or if you are a masochist,
+you like having your data stolen, and you like seeing ads in your operating system,
+there are pre-built binaries available on the [releases page](https://github.com/kugland/neocities-deploy/releases/latest).
+
+### macOS
+
+Ditto for macOS. Pre-built binaries are available on the [releases page](https://github.com/kugland/neocities-deploy/releases/latest).
+
+### Arch Linux
+
+The package is available in the AUR as [`neocities-deploy`](https://aur.archlinux.org/packages/neocities-deploy).
+You can install it with your favorite AUR helper, for example:
+
+```sh
+$ yay -S neocities-deploy
+```
+
+### Nix
+
+#### nix-shell
+
+```sh
+nix-shell -p 'pkgs.callPackage (builtins.fetchTarball "https://github.com/kugland/neocities-deploy/archive/master.tar.gz") { }'
+```
+
+#### NixOS, Home Manager
+
+```nix
+# With NixOS
+environment.systemPackages = [(pkgs.callPackage (builtins.fetchGit {
+  url = "https://github.com/kugland/neocities-deploy";
+  ref = "master";
+  rev = "3b2e62ef301ce1e7b46ee522d81dd1e7849ee73f"; # master
+}) { })];
+
+# For a single user:
+users.users.<user>.packages = [ ... ];
+
+# With Home Manager
+home.packages = [ ... ];
+```
+
+You should, of course, replace `rev` with the latest commit hash.
+
+#### Other distros
+
+You can build the project from source, or use the pre-built static binaries
+available on the [releases page](https://github.com/kugland/neocities-deploy/releases/latest) for
+a variety of architectures.
+
 ## License
 
 This project is licensed under the GNU General Public License v3.0. See the
