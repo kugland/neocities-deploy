@@ -1,6 +1,6 @@
 # neocities-deploy
 
-![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/kugland/neocities-deploy/.github%2Fworkflows%2Fbuild-and-test.yml) ![AUR Version](https://img.shields.io/aur/version/neocities-deploy) ![License](https://img.shields.io/github/license/kugland/neocities-deploy)
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/kugland/neocities-deploy/.github%2Fworkflows%2Fci.yml) ![AUR Version](https://img.shields.io/aur/version/neocities-deploy) ![License](https://img.shields.io/github/license/kugland/neocities-deploy)
 
 ---
 

@@ -1,14 +1,63 @@
-name: Tags in the form of v* become releases, build artifacts and create a draft release
+name: Tests and release
 
 on:
   push:
-    tags:
-      - "v*.*.*"
+    branches:
+      - "**"
+  pull_request:
+
+env:
+  RUST_BACKTRACE: 1
 
 jobs:
-  build-assets:
-    name: Building ${{ matrix.platform.name }}
+  sanity-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Version sanity checks
+        run: |
+          git fetch --tags
+
+          GIT_VER="$(git tag | sort -rV | sed -En '/^v[0-9]+\.[0-9]+\.[0-9]+$/{p;q}')"
+          CARGO_VER="v$(sed -En '/^\s*version\s*=\s*"([^"]+)"$/{s//\1/; p}' Cargo.toml)"
+          NIX_VER="v$(sed -En '/\s*version\s*=\s*"([^"]+)";$/{s//\1/g;p}' default.nix)"
+
+          SUCCESS=true
+          if [[ "${GIT_VER}" != "${CARGO_VER}" ]]; then
+            echo "Latest tag does not match version number in Cargo.toml"
+            SUCCESS=false
+          fi
+          if [[ "${GIT_VER}" != "${NIX_VER}" ]]; then
+            echo "Latest tag does not match version number in default.nix"
+            SUCCESS=false
+          fi
+
+          echo "Latest tag: ${GIT_VER}"
+          echo "Cargo.toml: ${CARGO_VER}"
+          echo "default.nix: ${NIX_VER}"
+
+          $SUCCESS || exit 1
+      - name: Cache cargo & target directories
+        uses: Swatinem/rust-cache@v2
+      - name: Install latest nightly
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly
+          override: true
+          components: rustfmt, clippy
+      - name: Run cargo fmt
+        run: cargo fmt --all -- --check
+      - name: Run cargo clippy
+        run: cargo clippy --all-targets --all-features -- --deny warnings
+      - name: Check if Cargo.lock is up-to-date
+        run: cargo check --locked
+
+  tests-and-release:
+    needs: sanity-checks
+    name: "${{ matrix.platform.os_name }} with rust ${{ matrix.toolchain }}"
+    runs-on: ${{ matrix.platform.os }}
     strategy:
+      fail-fast: false
       matrix:
         platform:
           - os_name: Linux-x86_64
@@ -69,7 +118,6 @@ jobs:
           - stable
           - beta
           - nightly
-    runs-on: ${{ matrix.platform.os }}
     steps:
       - uses: actions/checkout@v4
       - name: Cache cargo & target directories
@@ -122,11 +170,23 @@ jobs:
         if: |
           matrix.toolchain == 'stable' &&
           matrix.platform.os == 'macOS-latest' &&
-          ( startsWith( github.ref, 'refs/tags/v' ) ||
-            github.ref == 'refs/tags/test-release' )
+          ( startsWith( github.ref, 'refs/tags/v' ) || github.ref == 'refs/tags/test-release' )
       - name: Publish GitHub release
         uses: softprops/action-gh-release@v1
         with:
           draft: true
           files: "neocities-deploy-*"
         if: matrix.toolchain == 'stable' && startsWith( github.ref, 'refs/tags/v' )
+
+  aur-publish:
+    runs-on: ubuntu-latest
+    needs: tests-and-release
+    steps:
+      - name: Publish AUR package
+        uses: ATiltedTree/create-aur-release@v1
+        with:
+          package_name: neocities-deploy
+          commit_username: "Github Action Bot"
+          commit_email: github-action-bot@example.com
+          ssh_private_key: ${{ secrets.AUR_SSH_KEY }}
+        if: startsWith( github.ref, 'refs/tags/v' )
