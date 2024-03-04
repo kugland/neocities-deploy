@@ -146,7 +146,6 @@ pub fn local_tree(root: impl Into<PathBuf>, free_account: bool) -> Result<Vec<En
 mod tests {
     use super::*;
     use itertools::assert_equal;
-    use std::fs;
 
     const HELLO_SHA1: &str = "943a702d06f34599aee1f8da8ef9f7296031d699";
     const GOODBYE_SHA1: &str = "fcb7246c878762b3f752a6e1fc8573f154fffdec";
