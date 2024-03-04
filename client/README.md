@@ -1,6 +1,6 @@
 # neocities-client
 
-![Crates.io Version](https://img.shields.io/crates/v/neocities-client) ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/kugland/neocities-client/.github%2Fworkflows%2Fbuild-and-test.yml) ![License](https://img.shields.io/github/license/kugland/neocities-client)
+![Crates.io Version](https://img.shields.io/crates/v/neocities-client) ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/kugland/neocities-client/.github%2Fworkflows%2Fci.yml) ![License](https://img.shields.io/github/license/kugland/neocities-client)
 
 ---
 
