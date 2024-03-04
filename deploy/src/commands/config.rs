@@ -20,7 +20,6 @@ use crate::params::{Config, Params, Site};
 use anyhow::Result;
 use inquire::validator::{ErrorMessage, Validation};
 use neocities_client::Auth;
-use std::default::Default;
 use std::path::{Path, PathBuf};
 use url::Url;
 
