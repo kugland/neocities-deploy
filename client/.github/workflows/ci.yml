@@ -1,0 +1,122 @@
+name: Tests and release
+
+on:
+  push:
+    branches:
+      - "**"
+  pull_request:
+
+env:
+  RUST_BACKTRACE: 1
+
+jobs:
+  sanity-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Version sanity checks
+        run: |
+          git fetch --tags
+
+          GIT_VER="$(git tag | sort -rV | sed -En '/^v[0-9]+\.[0-9]+\.[0-9]+$/{p;q}')"
+          CARGO_VER="v$(sed -En '/^\s*version\s*=\s*"([^"]+)"$/{s//\1/; p}' Cargo.toml)"
+
+          SUCCESS=true
+          if [[ "${GIT_VER}" != "${CARGO_VER}" ]]; then
+            echo "Latest tag does not match version number in Cargo.toml"
+            SUCCESS=false
+          fi
+
+          echo "Latest tag: ${GIT_VER}"
+          echo "Cargo.toml: ${CARGO_VER}"
+
+          $SUCCESS || exit 1
+      - name: Cache cargo & target directories
+        uses: Swatinem/rust-cache@v2
+      - name: Check if Cargo.lock is up-to-date
+        run: cargo check --locked
+      - name: Install latest nightly
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly
+          override: true
+          components: rustfmt, clippy
+      - name: Run cargo fmt
+        run: cargo +nightly fmt --all -- --check
+      - name: Run cargo clippy
+        run: cargo +nightly clippy --all-targets --all-features -- --deny warnings
+
+  tests:
+    needs: sanity-checks
+    name: "${{ matrix.platform.target }} / ${{ matrix.toolchain }}"
+    runs-on: ${{ matrix.platform.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        platform:
+          - os: ubuntu-20.04
+            target: x86_64-unknown-linux-gnu
+          - os: ubuntu-20.04
+            target: aarch64-unknown-linux-gnu
+          - os: ubuntu-20.04
+            target: arm-unknown-linux-gnueabi
+          - os: ubuntu-20.04
+            target: i686-unknown-linux-gnu
+          - os: ubuntu-20.04
+            target: x86_64-unknown-linux-musl
+          - os: ubuntu-20.04
+            target: aarch64-unknown-linux-musl
+          - os: ubuntu-20.04
+            target: arm-unknown-linux-musleabi
+          - os: ubuntu-20.04
+            target: i686-unknown-linux-musl
+          - os: ubuntu-20.04
+            target: riscv64gc-unknown-linux-gnu
+          - os: windows-latest
+            target: aarch64-pc-windows-msvc
+            skip_tests: true
+          - os: windows-latest
+            target: i686-pc-windows-msvc
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+          - os: macOS-latest
+            target: x86_64-apple-darwin
+          - os: macOS-latest
+            target: aarch64-apple-darwin
+            skip_tests: true
+        toolchain:
+          - stable
+          - beta
+          - nightly
+    steps:
+      - uses: actions/checkout@v4
+      - name: Cache cargo & target directories
+        uses: Swatinem/rust-cache@v2
+      - name: Install musl-tools on Linux
+        run: sudo apt-get update --yes && sudo apt-get install --yes musl-tools
+        if: contains(matrix.platform.target, 'musl')
+      - name: Build library
+        uses: houseabsolute/actions-rust-cross@v0
+        with:
+          command: "build"
+          target: ${{ matrix.platform.target }}
+          toolchain: ${{ matrix.toolchain }}
+          args: "--locked"
+      - name: Run tests
+        uses: houseabsolute/actions-rust-cross@v0
+        with:
+          command: "test"
+          target: ${{ matrix.platform.target }}
+          toolchain: ${{ matrix.toolchain }}
+          args: "--locked --no-fail-fast"
+        if: ${{ !matrix.platform.skip_tests }}
+
+  release:
+    needs: tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Publish GitHub release
+        uses: softprops/action-gh-release@v1
+        with:
+          draft: true
+        if: startsWith( github.ref, 'refs/tags/v' )
