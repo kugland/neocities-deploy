@@ -23,15 +23,10 @@ jobs:
 
           GIT_VER="$( (git tag; git log --pretty='%s') |sort -Vr |sed -En '/^v[0-9]+\.[0-9]+\.[0-9]+$/{p;q}' )"
           CARGO_VER="v$(sed -En '/^\s*version\s*=\s*"([^"]+)"$/{s//\1/; p}' Cargo.toml)"
-          NIX_VER="v$(sed -En '/\s*version\s*=\s*"([^"]+)";$/{s//\1/g;p}' default.nix)"
 
           SUCCESS=true
           if [[ "${GIT_VER}" != "${CARGO_VER}" ]]; then
             echo "Latest tag does not match version number in Cargo.toml"
-            SUCCESS=false
-          fi
-          if [[ "${GIT_VER}" != "${NIX_VER}" ]]; then
-            echo "Latest tag does not match version number in default.nix"
             SUCCESS=false
           fi
 
