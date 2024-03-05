@@ -35,16 +35,14 @@ jobs:
         uses: Swatinem/rust-cache@v2
       - name: Check if Cargo.lock is up-to-date
         run: cargo check --locked
-      - name: Install latest nightly
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: nightly
-          override: true
-          components: rustfmt, clippy
       - name: Run cargo fmt
-        run: cargo +nightly fmt --all -- --check
+        run: cargo fmt --all -- --check
       - name: Run cargo clippy
-        run: cargo +nightly clippy --all-targets --all-features -- --deny warnings
+        run: cargo clippy --all-targets --all-features -- --deny warnings
+      - name: Install cargo-msrv
+        run: cargo install cargo-msrv --all-features
+      - name: Check MSRV
+        run: cargo msrv verify
 
   tests:
     needs: sanity-checks
