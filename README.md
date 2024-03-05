@@ -5,8 +5,10 @@
 ---
 
 **neocities-deploy** •
-[@codeberg](https://codeberg.org/kugland/neocities-deploy) |
-[@github](https://github.com/kugland/neocities-deploy)
+[GitHub](https://github.com/kugland/neocities-deploy) |
+[Codeberg](https://codeberg.org/kugland/neocities-deploy) |
+[AUR](https://aur.archlinux.org/packages/neocities-deploy) |
+[Releases](https://github.com/kugland/neocities-deploy/releases/latest)
 
 **neocities-client** •
 [@codeberg](https://codeberg.org/kugland/neocities-client) |
