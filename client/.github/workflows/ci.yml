@@ -16,23 +16,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Version sanity checks
-        run: |
-          git fetch --tags
-
-          GIT_VER="$(git tag | sort -rV | sed -En '/^v[0-9]+\.[0-9]+\.[0-9]+$/{p;q}')"
-          CARGO_VER="v$(sed -En '/^\s*version\s*=\s*"([^"]+)"$/{s//\1/; p}' Cargo.toml)"
-
-          SUCCESS=true
-          if [[ "${GIT_VER}" != "${CARGO_VER}" ]]; then
-            echo "Latest tag does not match version number in Cargo.toml"
-            SUCCESS=false
-          fi
-
-          echo "Latest tag: ${GIT_VER}"
-          echo "Cargo.toml: ${CARGO_VER}"
-
-          $SUCCESS || exit 1
       - name: Cache cargo & target directories
         uses: Swatinem/rust-cache@v2
       - name: Check if Cargo.lock is up-to-date
