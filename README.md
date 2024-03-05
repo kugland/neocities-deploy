@@ -5,8 +5,10 @@
 ---
 
 **neocities-deploy** •
-[@codeberg](https://codeberg.org/kugland/neocities-deploy) |
-[@github](https://github.com/kugland/neocities-deploy)
+[GitHub](https://github.com/kugland/neocities-deploy) |
+[Codeberg](https://codeberg.org/kugland/neocities-deploy) |
+[AUR](https://aur.archlinux.org/packages/neocities-deploy) |
+[Releases](https://github.com/kugland/neocities-deploy/releases/latest)
 
 **neocities-client** •
 [@codeberg](https://codeberg.org/kugland/neocities-client) |
@@ -115,18 +117,18 @@ $ yay -S neocities-deploy
 #### nix-shell
 
 ```sh
-nix-shell -p 'pkgs.callPackage (builtins.fetchTarball "https://github.com/kugland/neocities-deploy/archive/master.tar.gz") { }'
+nix-shell -p '(pkgs.callPackage (import (builtins.fetchTarball "https://github.com/kugland/nur-packages/tarball/master")) { }).neocities-deploy'
 ```
 
 #### NixOS, Home Manager
 
 ```nix
 # With NixOS
-environment.systemPackages = [(pkgs.callPackage (builtins.fetchGit {
-  url = "https://github.com/kugland/neocities-deploy";
+environment.systemPackages = [ (pkgs.callPackage (builtins.fetchGit {
+  url = "https://github.com/kugland/nur-packages";
   ref = "master";
-  rev = "3b2e62ef301ce1e7b46ee522d81dd1e7849ee73f"; # master
-}) { })];
+  rev = "af06c3aa6bd9e350772139b09465ef5228ca514d"; # master
+}) {}).neocities-deploy ];
 
 # For a single user:
 users.users.<user>.packages = [ ... ];
