@@ -23,6 +23,7 @@ use crate::{Auth, Error, Result};
 use derive_builder::Builder;
 use form_data_builder::FormData;
 use std::{ffi::OsStr, io::Cursor};
+use tap::prelude::*;
 use typed_path::Utf8UnixPath;
 use ureq::{Agent, OrAnyStatus, Request};
 
@@ -155,8 +156,8 @@ impl Client {
             .or_any_status()
             .map_err(Error::from)
             .and_then(|res| parse_response::<String>("message", res))
-            .inspect(|msg| log::trace!("{}", msg))
-            .inspect_err(|e| log::debug!("{}", e))
+            .tap_ok_dbg(|msg| log::trace!("{}", msg))
+            .tap_err(|e| log::debug!("{}", e))
             .and(Ok(()))
     }
 
@@ -169,8 +170,8 @@ impl Client {
             .or_any_status()
             .map_err(Error::from)
             .and_then(|res| parse_response::<Info>("info", res))
-            .inspect(|info| log::trace!("{:?}", info))
-            .inspect_err(|e| log::debug!("{}", e))
+            .tap_ok_dbg(|info| log::trace!("{:?}", info))
+            .tap_err(|e| log::debug!("{}", e))
     }
 
     /// Get an API key for the website.
@@ -182,8 +183,8 @@ impl Client {
             .or_any_status()
             .map_err(Error::from)
             .and_then(|res| parse_response::<String>("api_key", res))
-            .inspect(|_| log::trace!("Got an API key: <redacted>"))
-            .inspect_err(|e| log::debug!("{}", e))
+            .tap_ok_dbg(|_| log::trace!("Got an API key: <redacted>"))
+            .tap_err(|e| log::debug!("{}", e))
     }
 
     /// List the files on the website.
@@ -195,8 +196,8 @@ impl Client {
             .or_any_status()
             .map_err(Error::from)
             .and_then(|res| parse_response::<Vec<ListEntry>>("files", res))
-            .inspect(|list| log::trace!("{:?}", list))
-            .inspect_err(|e| log::debug!("{}", e))
+            .tap_ok_dbg(|list| log::trace!("{:?}", list))
+            .tap_err(|e| log::debug!("{}", e))
     }
 
     /// Upload one or more files to the website.
@@ -229,7 +230,7 @@ impl Client {
                 Some(OsStr::new("file")),
                 "application/octet-stream",
             )
-            .inspect_err(|e| log::debug!("{}", e))
+            .tap_err(|e| log::debug!("{}", e))
             // The only occasion where in-memory fake I/O can fail is when we run out of memory,
             // and in that case, we're screwed anyway. Having this possible panic here allows us to
             // avoid having a variant for [`std::io::Error`] in our [`Error`] enum.
@@ -237,7 +238,7 @@ impl Client {
         }
         let post_body = form
             .finish()
-            .inspect_err(|e| log::debug!("{}", e))
+            .tap_err(|e| log::debug!("{}", e))
             .expect("Failed to finish form data"); // Same as above.
         let content_type = form.content_type_header();
         self.make_request("POST", "upload")
@@ -246,8 +247,8 @@ impl Client {
             .or_any_status()
             .map_err(Error::from)
             .and_then(|res| parse_response::<String>("message", res))
-            .inspect(|list| log::trace!("{:?}", list))
-            .inspect_err(|e| log::debug!("{}", e))
+            .tap_ok_dbg(|list| log::trace!("{:?}", list))
+            .tap_err(|e| log::debug!("{}", e))
             .and(Ok(()))
     }
 
