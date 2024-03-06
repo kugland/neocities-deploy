@@ -1,11 +1,10 @@
-name: Tests and release
-
 on:
   push:
     branches:
-      - "**"
+      - "master"
+      - "devel"
     tags:
-      - "v*"
+      - "v*.*.*"
   pull_request:
 
 env:
@@ -16,21 +15,56 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Cache cargo & target directories
-        uses: Swatinem/rust-cache@v2
-      - name: Check if Cargo.lock is up-to-date
-        run: cargo check --locked
-      - name: Run cargo fmt
-        run: cargo fmt --all -- --check
-      - name: Run cargo clippy
-        run: cargo clippy --all-targets --all-features -- --deny warnings
-      - name: Install cargo-msrv
-        run: cargo install cargo-msrv --all-features
-      - name: Check MSRV
-        run: cargo msrv verify
+      - name: Version sanity checks
+        run: |
+          set -eu -o pipefail
+
+          CARGO_VER="v$(sed -En '/^\s*version\s*=\s*"([^"]+)"$/{s//\1/; p}' Cargo.toml)"
+          echo "➡️ Cargo.toml version: $CARGO_VER"
+
+          if [[ ${{ github.ref }} == refs/tags/v* ]]; then
+            TAG_VER="$(sed -E 's|^refs/tags/||' <<< "${{ github.ref }}")"
+            if [[ "$CARGO_VER" != "$TAG_VER" ]]; then
+              echo "🚨 Tag version ($TAG_VER) doesn’t match version in Cargo.toml ($CARGO_VER)"
+              exit 1
+            fi
+            echo "✅ Tag version: $TAG_VER"
+          fi
+
+          LAST_MSG="$(git log --pretty=%s | sed -En '/^v[0-9]+\.[0-9]+\.[0-9]+$/{p;q}' || true)"
+          if [[ -n "$LAST_MSG" ]]; then
+            if [[ "$CARGO_VER" != "$LAST_MSG" ]]; then
+              echo "🚨 Last commit msg ($LAST_MSG) doesn’t match version in Cargo.toml ($CARGO_VER)"
+              exit 1
+            fi
+            echo "✅ Last commit message version: $LAST_MSG"
+          fi
+      - uses: Swatinem/rust-cache@v2
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      - run: cargo fmt --all -- --check
+      - run: cargo check --locked
+      - run: cargo clippy --all-targets --all-features -- --deny warnings
+
+  msrv:
+    needs: sanity-checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Find MSRV
+        id: find-msrv
+        run: |
+          MSRV="$(sed -En '/^rust-version = /{s///;s/"//g;p}' Cargo.toml)"
+          echo "MSRV=$MSRV" >> "$GITHUB_OUTPUT"
+      - uses: Swatinem/rust-cache@v2
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ steps.find-msrv.outputs.MSRV }}
+      - run: cargo build --locked --release
 
   tests:
-    needs: sanity-checks
+    needs: msrv
     name: "${{ matrix.platform.target }} / ${{ matrix.toolchain }}"
     runs-on: ${{ matrix.platform.os }}
     strategy:
