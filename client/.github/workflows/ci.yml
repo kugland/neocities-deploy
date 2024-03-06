@@ -47,7 +47,6 @@ jobs:
             target: x86_64-apple-darwin
         toolchain:
           - stable
-          - beta
           - nightly
     steps:
       - uses: actions/checkout@v4
@@ -70,7 +69,6 @@ jobs:
           target: ${{ matrix.platform.target }}
           toolchain: ${{ matrix.toolchain }}
           args: "--locked --no-fail-fast"
-        if: ${{ !matrix.platform.skip_tests }}
 
   release:
     needs: tests
