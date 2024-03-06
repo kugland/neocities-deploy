@@ -31,7 +31,6 @@ jobs:
 
           echo "Latest tag: ${GIT_VER}"
           echo "Cargo.toml: ${CARGO_VER}"
-          echo "default.nix: ${NIX_VER}"
 
           $SUCCESS || exit 1
       - name: Cache cargo & target directories
