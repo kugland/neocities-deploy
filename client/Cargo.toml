@@ -11,7 +11,7 @@ resolver = "2"
 rust-version = "1.70.0"
 
 [dependencies]
-base64 = "0.21.7"
+base64 = "0.22.0"
 derive_builder = "0.20.0"
 form-data-builder = "1.0.1"
 indoc = "2.0.4"
