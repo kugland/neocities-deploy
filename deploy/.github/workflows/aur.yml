@@ -14,3 +14,10 @@ jobs:
             commit_username: "Github Action Bot"
             commit_email: github-action-bot@example.com
             ssh_private_key: ${{ secrets.AUR_SSH_KEY }}
+      - name: Publish AUR package bin
+        uses: ATiltedTree/create-aur-release@v1
+        with:
+            package_name: neocities-deploy-bin
+            commit_username: "Github Action Bot"
+            commit_email: github-action-bot@example.com
+            ssh_private_key: ${{ secrets.AUR_SSH_KEY }}
