@@ -19,9 +19,9 @@
 use crate::trees::Entry;
 use crate::{params::Params, trees};
 use anyhow::Result;
-use derive_more::Display;
 use itertools::{EitherOrBoth::*, Itertools};
 use neocities_client::Client;
+use parse_display::Display;
 use std::fs;
 
 /// Deploy local files to the site(s).
@@ -57,10 +57,10 @@ pub fn deploy(params: &Params) -> Result<()> {
 /// Actions to deploy the local tree to the site.
 pub enum Action {
     /// Upload a file to the remote entry.
-    #[display(fmt = "upload {}", "_0.path")]
+    #[display("upload {0.path}")]
     Upload(Entry),
     /// Delete a remote entry.
-    #[display(fmt = "delete remote {}", "_0.path")]
+    #[display("delete remote {0.path}")]
     DeleteRemote(Entry),
 }
 
