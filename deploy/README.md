@@ -7,14 +7,16 @@
 **neocities-deploy** •
 [GitHub](https://github.com/kugland/neocities-deploy) |
 [Codeberg](https://codeberg.org/kugland/neocities-deploy) |
+[Releases](https://github.com/kugland/neocities-deploy/releases/latest) |
 [AUR](https://aur.archlinux.org/packages/neocities-deploy) |
-[Releases](https://github.com/kugland/neocities-deploy/releases/latest)
+[AUR (git)](https://aur.archlinux.org/packages/neocities-deploy-git) |
+[AUR (binary)](https://aur.archlinux.org/packages/neocities-deploy-bin)
 
 **neocities-client** •
-[@codeberg](https://codeberg.org/kugland/neocities-client) |
-[@github](https://github.com/kugland/neocities-client) |
-[@crates.io](https://crates.io/crates/neocities-client) |
-[@docs.rs](https://docs.rs/neocities-client)
+[Codeberg](https://codeberg.org/kugland/neocities-client) |
+[GitHub](https://github.com/kugland/neocities-client) |
+[crates.io](https://crates.io/crates/neocities-client) |
+[docs.rs](https://docs.rs/neocities-client)
 
 ---
 
