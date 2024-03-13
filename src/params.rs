@@ -24,7 +24,7 @@ use directories::ProjectDirs;
 use indexmap::IndexMap;
 use neocities_client::{Auth, Client};
 use serde::{Deserialize, Serialize};
-use std::{fs, path::PathBuf};
+use std::{env, fs, path::PathBuf};
 use ureq::{AgentBuilder, Proxy};
 
 #[derive(Debug, Parser)]
@@ -201,7 +201,13 @@ impl Site {
             }
             builder.build()
         };
-        let client = Client::builder().ureq_agent(agent).auth(auth).build()?;
+        let client = {
+            let mut client_builder = Client::builder();
+            if let Ok(mockito_address) = env::var("NEOCITIES_DEPLOY_API_URL") {
+                client_builder.base_url(mockito_address);
+            }
+            client_builder.ureq_agent(agent).auth(auth).build()?
+        };
         Ok(client)
     }
 }
