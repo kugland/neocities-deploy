@@ -14,7 +14,7 @@ rust-version = "1.70.0"
 base64 = "0.22.0"
 derive_builder = "0.20.0"
 form-data-builder = "1.0.1"
-indoc = "2.0.4"
+indoc = "2.0.5"
 log = "0.4.21"
 parse-display = { version = "0.9.0", default-features = false }
 serde = { version = "1.0.197", features = ["derive"] }
