@@ -13,8 +13,8 @@
 [AUR (binary)](https://aur.archlinux.org/packages/neocities-deploy-bin)
 
 **neocities-client** •
-[Codeberg](https://codeberg.org/kugland/neocities-client) |
 [GitHub](https://github.com/kugland/neocities-client) |
+[Codeberg](https://codeberg.org/kugland/neocities-client) |
 [crates.io](https://crates.io/crates/neocities-client) |
 [docs.rs](https://docs.rs/neocities-client)
 
@@ -151,3 +151,11 @@ a variety of architectures.
 
 This project is licensed under the GNU General Public License v3.0. See the
 [LICENSE](LICENSE) file for details.
+
+## Send me a tip
+
+If you find this project useful, you can send me a tip.
+
+**Bitcoin:** `bc1qlj7jdw6fff0q8yg93ssg6qp04p88cuurgwxk8r`
+
+**Monero:** `43mSMDDTuwbGX8LBH7XpT6gbnUcJ86KWVfrpKbopnk7QTDpQkSb53e43MBGGyZ8FgYZ3YzcaTa4Pb46cQUz3DsXeRn4Ef5e`
