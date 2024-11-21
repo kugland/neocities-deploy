@@ -977,9 +977,9 @@ dependencies = [
 
 [[package]]
 name = "typed-path"
-version = "0.9.0"
+version = "0.9.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e8a3023f4683cd1a846dbd2666e8c34f54338ee5cebae578cda981a87cecd7aa"
+checksum = "82205ffd44a9697e34fc145491aa47310f9871540bb7909eaa9365e0a9a46607"
 
 [[package]]
 name = "unicode-bidi"
