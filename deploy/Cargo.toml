@@ -8,7 +8,7 @@ homepage = "https://github.com/kugland/neocities-deploy"
 repository = "https://github.com/kugland/neocities-deploy"
 edition = "2021"
 resolver = "2"
-rust-version = "1.82.0"
+rust-version = "1.70.0"
 
 [dependencies]
 anyhow = "1.0.82"
