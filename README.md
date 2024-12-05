@@ -61,9 +61,28 @@ and is not endorsed by Neocities.
 
 ## Configuration
 
-The configuration file is a TOML file. It should be located at
-`~/.config/neocities-deploy/config.toml`. A configuration file might look like
-this:
+The configuration file is a TOML file.
+
+### Location of the configuration
+
+The location of the configuration file varies with the platform you’re
+using. (See the documentation for the `config_dir` function in the Rust
+package called [directories](https://docs.rs/directories/latest/directories/struct.ProjectDirs.html#method.config_dir)
+for clarification.)
+
+On **Linux**, `$XDG_CONFIG_HOME/neocities-deploy/config.toml`
+(or `$HOME/.config/neocities-deploy/config.toml` if `$XDG_CONFIG_HOME` is
+not defined). For example: `/home/alice/.config/neocities-deploy/config.toml`.
+
+On **macOS**, `$HOME/Library/Application Support/neocities-deploy/config.toml`.
+For example, `/Users/Alice/Library/Application Support/neocities-deploy/config.toml`.
+
+On **Windows**, `{FOLDERID_RoamingAppData}\neocities-deploy\config\config.toml`.
+For example, `C:\Users\Alice\AppData\Roaming\neocities-deploy\config\config.toml`.
+
+### Example configuration
+
+A configuration file might look like this:
 
 ```toml
 [site."site1"]
