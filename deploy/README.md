@@ -66,12 +66,12 @@ The configuration file is a TOML file. It should be located at
 this:
 
 ```toml
-[sites."site1"]
+[site."site1"]
 auth = "username:password"
 path = "/path/to/site1"
 free_account = true
 
-[sites."site2"]
+[site."site2"]
 auth = "6f5902ac237024bdd0c176cb93063dc4" # An API key
 path = "/path/to/site2"
 free_account = false
