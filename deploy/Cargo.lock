@@ -1145,7 +1145,7 @@ dependencies = [
  "form-data-builder",
  "indoc",
  "log",
- "parse-display 0.10.0",
+ "parse-display",
  "serde",
  "serde_json",
  "tap",
@@ -1171,7 +1171,7 @@ dependencies = [
  "log",
  "mockito",
  "neocities-client",
- "parse-display 0.9.1",
+ "parse-display",
  "predicates",
  "pretty_env_logger",
  "serde",
@@ -1253,34 +1253,11 @@ dependencies = [
 
 [[package]]
 name = "parse-display"
-version = "0.9.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "914a1c2265c98e2446911282c6ac86d8524f495792c38c5bd884f80499c7538a"
-dependencies = [
- "parse-display-derive 0.9.1",
-]
-
-[[package]]
-name = "parse-display"
 version = "0.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "287d8d3ebdce117b8539f59411e4ed9ec226e0a4153c7f55495c6070d68e6f72"
 dependencies = [
- "parse-display-derive 0.10.0",
-]
-
-[[package]]
-name = "parse-display-derive"
-version = "0.9.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2ae7800a4c974efd12df917266338e79a7a74415173caf7e70aa0a0707345281"
-dependencies = [
- "proc-macro2",
- "quote",
- "regex",
- "regex-syntax",
- "structmeta",
- "syn",
+ "parse-display-derive",
 ]
 
 [[package]]
