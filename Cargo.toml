@@ -22,7 +22,7 @@ serde_json = "1.0.116"
 tap = "1.0.1"
 thiserror = "2.0.0"
 typed-path = "0.10.0"
-ureq = "2.9.6"
+ureq = "3.0.0"
 
 [dev-dependencies]
 mockito = "1.4.0"
