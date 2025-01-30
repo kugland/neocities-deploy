@@ -21,7 +21,7 @@ mod client;
 mod error;
 
 pub mod response;
-pub use ureq;
 pub use auth::Auth;
 pub use client::{Client, ClientBuilder};
 pub use error::{Error, ErrorKind, Result};
+pub use ureq;
