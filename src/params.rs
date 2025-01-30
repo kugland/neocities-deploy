@@ -22,10 +22,12 @@ use anyhow::{anyhow, Result};
 use clap::{ArgAction::Count, Parser};
 use directories::ProjectDirs;
 use indexmap::IndexMap;
-use neocities_client::{Auth, Client};
+use neocities_client::{
+    ureq::{AgentBuilder, Proxy},
+    Auth, Client,
+};
 use serde::{Deserialize, Serialize};
 use std::{env, fs, path::PathBuf};
-use ureq::{AgentBuilder, Proxy};
 
 #[derive(Debug, Parser)]
 #[command(version, about, author, long_about = None)]

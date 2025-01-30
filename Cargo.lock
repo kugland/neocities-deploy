@@ -1135,9 +1135,9 @@ dependencies = [
 
 [[package]]
 name = "neocities-client"
-version = "0.1.12"
+version = "0.1.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2501a98608f5ac036003f5892edc137243356f9d1f0b9578de8b252351faddc9"
+checksum = "28900330b245c7fe1ee4f03fbe6f98c8d50cab2ddd7c961cbfb6136a4c7ca598"
 dependencies = [
  "base64 0.22.0",
  "derive_builder",
@@ -1178,7 +1178,6 @@ dependencies = [
  "sha1",
  "tempfile",
  "toml",
- "ureq",
  "url",
 ]
 
