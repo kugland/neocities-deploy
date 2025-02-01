@@ -1135,9 +1135,9 @@ dependencies = [
 
 [[package]]
 name = "neocities-client"
-version = "0.1.14"
+version = "0.1.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "28900330b245c7fe1ee4f03fbe6f98c8d50cab2ddd7c961cbfb6136a4c7ca598"
+checksum = "a71681a09917d8f9c551c3e48abc8e296b959c3d12dc4c1b855d6e5a1ad2e900"
 dependencies = [
  "base64 0.22.0",
  "derive_builder",
@@ -1155,7 +1155,7 @@ dependencies = [
 
 [[package]]
 name = "neocities-deploy"
-version = "0.1.14"
+version = "0.1.15"
 dependencies = [
  "anyhow",
  "assert_cmd",
@@ -1251,18 +1251,18 @@ dependencies = [
 
 [[package]]
 name = "parse-display"
-version = "0.10.0"
+version = "0.9.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "287d8d3ebdce117b8539f59411e4ed9ec226e0a4153c7f55495c6070d68e6f72"
+checksum = "914a1c2265c98e2446911282c6ac86d8524f495792c38c5bd884f80499c7538a"
 dependencies = [
  "parse-display-derive",
 ]
 
 [[package]]
 name = "parse-display-derive"
-version = "0.10.0"
+version = "0.9.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7fc048687be30d79502dea2f623d052f3a074012c6eac41726b7ab17213616b1"
+checksum = "2ae7800a4c974efd12df917266338e79a7a74415173caf7e70aa0a0707345281"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1775,7 +1775,7 @@ dependencies = [
  "fastrand",
  "once_cell",
  "rustix",
- "windows-sys 0.52.0",
+ "windows-sys 0.59.0",
 ]
 
 [[package]]
