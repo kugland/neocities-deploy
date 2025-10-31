@@ -1,0 +1,222 @@
+name: Tests and release
+
+on:
+  push:
+    branches:
+      - "master"
+      - "devel"
+    tags:
+      - "v*.*.*"
+  pull_request:
+
+env:
+  RUST_BACKTRACE: 1
+
+jobs:
+  sanity-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Version sanity checks
+        run: |
+          set -eu -o pipefail
+
+          # Check workspace version
+          CARGO_VER="v$(sed -En '/^\s*version\s*=\s*"([^"]+)"$/{s//\1/; p}' Cargo.toml)"
+          echo "➡️ Workspace Cargo.toml version: $CARGO_VER"
+
+          if [[ ${{ github.ref }} == refs/tags/v* ]]; then
+            TAG_VER="$(sed -E 's|^refs/tags/||' <<< "${{ github.ref }}")"
+            if [[ "$CARGO_VER" != "$TAG_VER" ]]; then
+              echo "🚨 Tag version ($TAG_VER) doesn't match version in Cargo.toml ($CARGO_VER)"
+              exit 1
+            fi
+            echo "✅ Tag version: $TAG_VER"
+          fi
+
+          LAST_MSG="$(git log --pretty=%s | sed -En '/^v[0-9]+\.[0-9]+\.[0-9]+$/{p;q}' || true)"
+          if [[ -n "$LAST_MSG" ]]; then
+            if [[ "$CARGO_VER" != "$LAST_MSG" ]]; then
+              echo "🚨 Last commit msg ($LAST_MSG) doesn't match version in Cargo.toml ($CARGO_VER)"
+              exit 1
+            fi
+            echo "✅ Last commit message version: $LAST_MSG"
+          fi
+      - uses: Swatinem/rust-cache@v2
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      - run: cargo fmt --all -- --check
+      - run: cargo check --workspace --locked
+      - run: cargo clippy --workspace --all-targets --all-features -- --deny warnings
+
+  msrv:
+    needs: sanity-checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Find MSRV
+        id: find-msrv
+        run: |
+          MSRV="$(sed -En '/^rust-version = /{s///;s/"//g;p}' Cargo.toml)"
+          echo "MSRV=$MSRV" >> "$GITHUB_OUTPUT"
+      - uses: Swatinem/rust-cache@v2
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ steps.find-msrv.outputs.MSRV }}
+      - run: cargo build --workspace --locked --release
+
+  tests:
+    needs: msrv
+    name: "${{ matrix.platform.target }} / ${{ matrix.toolchain }}"
+    runs-on: ${{ matrix.platform.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        platform:
+          - os: ubuntu-20.04
+            target: x86_64-unknown-linux-gnu
+          - os: ubuntu-20.04
+            target: aarch64-unknown-linux-musl
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+          - os: macOS-latest
+            target: x86_64-apple-darwin
+        toolchain:
+          - stable
+          - nightly
+    steps:
+      - uses: actions/checkout@v4
+      - name: Cache cargo & target directories
+        uses: Swatinem/rust-cache@v2
+      - name: Install musl-tools on Linux
+        run: sudo apt-get update --yes && sudo apt-get install --yes musl-tools
+        if: contains(matrix.platform.target, 'musl')
+      - name: Build workspace
+        uses: houseabsolute/actions-rust-cross@v0
+        with:
+          command: "build"
+          target: ${{ matrix.platform.target }}
+          toolchain: ${{ matrix.toolchain }}
+          args: "--workspace --locked"
+      - name: Run tests
+        uses: houseabsolute/actions-rust-cross@v0
+        with:
+          command: "test"
+          target: ${{ matrix.platform.target }}
+          toolchain: ${{ matrix.toolchain }}
+          args: "--workspace --locked --no-fail-fast"
+
+  build-binaries:
+    needs: tests
+    name: "${{ matrix.platform.os_name }}"
+    runs-on: ${{ matrix.platform.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        platform:
+          - os_name: Linux-x86_64
+            os: ubuntu-20.04
+            target: x86_64-unknown-linux-musl
+            bin: neocities-deploy
+            name: neocities-deploy-Linux-x86_64-musl.tar.gz
+          - os_name: Linux-aarch64
+            os: ubuntu-20.04
+            target: aarch64-unknown-linux-musl
+            bin: neocities-deploy
+            name: neocities-deploy-Linux-aarch64-musl.tar.gz
+          - os_name: Linux-arm
+            os: ubuntu-20.04
+            target: arm-unknown-linux-musleabi
+            bin: neocities-deploy
+            name: neocities-deploy-Linux-arm-musl.tar.gz
+          - os_name: Linux-i686
+            os: ubuntu-20.04
+            target: i686-unknown-linux-musl
+            bin: neocities-deploy
+            name: neocities-deploy-Linux-i686-musl.tar.gz
+            skip_tests: true
+          - os_name: Linux-riscv64
+            os: ubuntu-20.04
+            target: riscv64gc-unknown-linux-gnu
+            bin: neocities-deploy
+            name: neocities-deploy-Linux-riscv64gc-gnu.tar.gz
+          - os_name: Windows-aarch64
+            os: windows-latest
+            target: aarch64-pc-windows-msvc
+            bin: neocities-deploy.exe
+            name: neocities-deploy-Windows-aarch64.zip
+            skip_tests: true
+          - os_name: Windows-i686
+            os: windows-latest
+            target: i686-pc-windows-msvc
+            bin: neocities-deploy.exe
+            name: neocities-deploy-Windows-i686.zip
+            skip_tests: true
+          - os_name: Windows-x86_64
+            os: windows-latest
+            target: x86_64-pc-windows-msvc
+            bin: neocities-deploy.exe
+            name: neocities-deploy-Windows-x86_64.zip
+          - os_name: macOS-x86_64
+            os: macOS-latest
+            target: x86_64-apple-darwin
+            bin: neocities-deploy
+            name: neocities-deploy-Darwin-x86_64.tar.gz
+          - os_name: macOS-aarch64
+            os: macOS-latest
+            target: aarch64-apple-darwin
+            bin: neocities-deploy
+            name: neocities-deploy-Darwin-aarch64.tar.gz
+            skip_tests: true
+    steps:
+      - uses: actions/checkout@v4
+      - name: Cache cargo & target directories
+        uses: Swatinem/rust-cache@v2
+      - name: Configure Git
+        run: |
+          git config --global user.email "jdoe@example.com"
+          git config --global user.name "J. Doe"
+      - name: Install musl-tools on Linux
+        run: sudo apt-get update --yes && sudo apt-get install --yes musl-tools
+        if: contains(matrix.platform.name, 'musl')
+      - name: Build binary
+        uses: houseabsolute/actions-rust-cross@v0
+        with:
+          command: "build"
+          target: ${{ matrix.platform.target }}
+          toolchain: stable
+          args: "--package neocities-deploy --locked --release"
+          strip: true
+      - name: Run tests
+        uses: houseabsolute/actions-rust-cross@v0
+        with:
+          command: "test"
+          target: ${{ matrix.platform.target }}
+          toolchain: stable
+          args: "--package neocities-deploy --locked --release"
+        if: ${{ !matrix.platform.skip_tests }}
+      - name: Package as archive
+        shell: bash
+        run: |
+          cd target/${{ matrix.platform.target }}/release
+          if [[ "${{ matrix.platform.os }}" == "windows-latest" ]]; then
+            7z a ../../../${{ matrix.platform.name }} ${{ matrix.platform.bin }}
+          else
+            tar czvf ../../../${{ matrix.platform.name }} ${{ matrix.platform.bin }}
+          fi
+          cd -
+        if: startsWith( github.ref, 'refs/tags/v' )
+      - name: Publish release artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: neocities-deploy-${{ matrix.platform.os_name }}
+          path: "neocities-deploy-*"
+        if: startsWith( github.ref, 'refs/tags/v' )
+      - name: Publish GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          draft: true
+          files: "neocities-deploy-*"
+        if: startsWith( github.ref, 'refs/tags/v' )
+

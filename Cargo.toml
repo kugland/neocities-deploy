@@ -1,0 +1,30 @@
+[workspace]
+members = [
+    "neocities-client",
+    "neocities-deploy",
+]
+
+resolver = "2"
+
+[workspace.package]
+version = "0.2.0"
+license = "GPL-3.0"
+authors = ["André Kugland <kugland@gmail.com>"]
+edition = "2024"
+rust-version = "1.89"
+homepage = "https://github.com/kugland/neocities-deploy"
+repository = "https://github.com/kugland/neocities-deploy"
+
+[workspace.dependencies]
+# Common dependencies used by both packages
+indoc = "2.0.5"
+log = "0.4.21"
+mockito = "1.4.0"
+parse-display = { version = "0.9.1", default-features = false }
+serde = { version = "1.0.200", features = ["derive"] }
+
+[profile.dev]
+split-debuginfo = "unpacked"
+
+[profile.release]
+opt-level = "z"

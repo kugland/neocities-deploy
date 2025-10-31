@@ -1,0 +1,26 @@
+name: Publish to crates.io
+
+on:
+  release:
+    types:
+      - published
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  publish-client:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions-rs/toolchain@v1
+        with:
+            toolchain: stable
+            override: true
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@v2.7.7
+      - name: Publish neocities-client
+        run: |
+          cd neocities-client
+          cargo publish --token=${{ secrets.CRATES_IO_TOKEN }}
+
