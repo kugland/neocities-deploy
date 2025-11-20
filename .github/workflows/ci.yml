@@ -16,7 +16,7 @@ jobs:
   sanity-checks:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Version sanity checks
         run: |
           set -eu -o pipefail
@@ -53,7 +53,7 @@ jobs:
     needs: sanity-checks
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Find MSRV
         id: find-msrv
         run: |
@@ -131,7 +131,7 @@ jobs:
           - stable
           - nightly
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Cache cargo & target directories
         uses: Swatinem/rust-cache@v2
       - name: Configure Git
