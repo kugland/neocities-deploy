@@ -1,20 +1,17 @@
 # neocities-deploy
 
-![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/kugland/neocities-deploy/.github%2Fworkflows%2Fci.yml) ![AUR Version](https://img.shields.io/aur/version/neocities-deploy) ![License](https://img.shields.io/github/license/kugland/neocities-deploy)
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/kugland/neocities-deploy/.github%2Fworkflows%2Fci.yml)
+![AUR Version](https://img.shields.io/aur/version/neocities-deploy)
+![License](https://img.shields.io/github/license/kugland/neocities-deploy)
 
 ---
 
-**neocities-deploy** •
 [GitHub](https://github.com/kugland/neocities-deploy) |
 [Codeberg](https://codeberg.org/kugland/neocities-deploy) |
 [Releases](https://github.com/kugland/neocities-deploy/releases/latest) |
 [AUR](https://aur.archlinux.org/packages/neocities-deploy) |
 [AUR (git)](https://aur.archlinux.org/packages/neocities-deploy-git) |
-[AUR (binary)](https://aur.archlinux.org/packages/neocities-deploy-bin)
-
-**neocities-client** •
-[GitHub](https://github.com/kugland/neocities-client) |
-[Codeberg](https://codeberg.org/kugland/neocities-client) |
+[AUR (binary)](https://aur.archlinux.org/packages/neocities-deploy-bin) |
 [crates.io](https://crates.io/crates/neocities-client) |
 [docs.rs](https://docs.rs/neocities-client)
 
