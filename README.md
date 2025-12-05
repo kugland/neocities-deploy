@@ -134,19 +134,19 @@ $ yay -S neocities-deploy
 
 #### nix-shell
 
-```sh
-nix-shell -p '(pkgs.callPackage (import (builtins.fetchTarball "https://github.com/kugland/nur-packages/tarball/master")) { }).neocities-deploy'
+```console
+$ nix-shell -p '(builtins.fetchTarball "https://github.com/kugland/neocities-deploy/tarball/master")'
 ```
 
-#### NixOS, Home Manager
+#### NixOS / Home Manager
 
 ```nix
 # With NixOS
-environment.systemPackages = [ (pkgs.callPackage (builtins.fetchGit {
-  url = "https://github.com/kugland/nur-packages";
+environment.systemPackages = [ (import ((builtins.fetchGit {
+  url = "https://github.com/kugland/neocities-deploy";
   ref = "master";
-  rev = "af06c3aa6bd9e350772139b09465ef5228ca514d"; # master
-}) {}).neocities-deploy ];
+  rev = "dee923b2f1f8c927435d96a902b61b89f04d755e";
+}) + "/default.nix")).packages."${pkgs.system}".default ];
 
 # For a single user:
 users.users.<user>.packages = [ ... ];
@@ -157,11 +157,25 @@ home.packages = [ ... ];
 
 You should, of course, replace `rev` with the latest commit hash.
 
+
+#### Nix with flakes
+
+To use Nix with flakes, add `github:kugland/neocities-deploy` as an input
+to your `flake.nix`, and then use the package defined in the flake, as
+`packages.<system>.neocities-deploy`.
+
+You can also run it directly with `nix run`:
+
+```console
+nix run github:kugland/neocities-deploy
+```
+
+
 #### Other distros
 
 You can build the project from source, or use the pre-built static binaries
-available on the [releases page](https://github.com/kugland/neocities-deploy/releases/latest) for
-a variety of architectures.
+available on the [releases page](https://github.com/kugland/neocities-deploy/releases/latest)
+for a variety of architectures.
 
 ## License
 
