@@ -39,6 +39,10 @@
           };
           default = config.packages.neocities-deploy;
         };
+        legacyPackages = {
+          neocities-deploy = config.packages.neocities-deploy;
+          default = config.packages.default;
+        };
         apps = {
           neocities-deploy = {
             type = "app";
