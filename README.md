@@ -21,7 +21,7 @@
 It can upload files to your site, list remote files, and more.
 
 Also part of this project is a Rust library for interacting with the Neocities
-API, **neocities-client**.
+API, **[neocities-client](./client)**.
 
 This project *is in no way affiliated with Neocities*. It is a personal project
 and is not endorsed by Neocities.
