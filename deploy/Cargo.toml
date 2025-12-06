@@ -1,14 +1,14 @@
 [package]
 name = "neocities-deploy"
 description = "A command-line tool for deploying your Neocities site"
-version = "0.1.15"
-license = "GPL-3.0"
-authors = ["André Kugland <kugland@gmail.com>"]
-homepage = "https://github.com/kugland/neocities-deploy"
-repository = "https://github.com/kugland/neocities-deploy"
-edition = "2021"
-resolver = "2"
-rust-version = "1.74.1"
+readme = "../README.md"
+authors.workspace = true
+edition.workspace = true
+homepage.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+version.workspace = true
 
 [dependencies]
 anyhow = "1.0.82"
@@ -19,25 +19,19 @@ ignore = "0.4.22"
 indexmap = { version = "2.2.6", features = ["serde"] }
 inquire = "0.7.4"
 itertools = "0.14.0"
-log = "0.4.21"
-neocities-client = "0.1.15"
-parse-display = { version = "0.9.1", default-features = false }
+log.workspace = true
+neocities-client = { path = "../client" }
+parse-display.workspace = true
 pretty_env_logger = "0.5.0"
-serde = { version = "1.0.200", features = ["derive"] }
+serde.workspace = true
 sha1 = "0.10.6"
 toml = { version = "0.8.12", features = ["preserve_order"] }
 url = "2.5.0"
 
 [dev-dependencies]
 assert_cmd = "2.0.14"
-indoc = "2.0.4"
-mockito = "1.4.0"
+indoc.workspace = true
+mockito.workspace = true
 predicates = "3.1.0"
 serial_test = "3.0.0"
 tempfile = "3.10.1"
-
-[profile.dev]
-split-debuginfo = "unpacked"
-
-[profile.release]
-opt-level = "z"

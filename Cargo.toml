@@ -1,0 +1,29 @@
+[workspace]
+members = [
+    "deploy",
+    "client",
+]
+resolver = "2"
+
+[workspace.package]
+authors = ["André Kugland <kugland@gmail.com>"]
+description = "A command-line tool for deploying your Neocities site and a library for interacting with the Neocities API"
+homepage = "https://github.com/kugland/neocities-deploy"
+repository = "https://github.com/kugland/neocities-deploy"
+version = "0.1.18"
+edition = "2021"
+license = "GPL-3.0"
+rust-version = "1.74.1"
+
+[workspace.dependencies]
+indoc = "2.0.5"
+log = "0.4.21"
+mockito = "1.4.0"
+parse-display = { version = "0.9.1", default-features = false }
+serde = { version = "1.0.200", features = ["derive"] }
+
+[profile.dev]
+split-debuginfo = "unpacked"
+
+[profile.release]
+opt-level = "z"
