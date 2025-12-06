@@ -1,5 +1,6 @@
 # neocities-deploy
 
+[![Release](https://img.shields.io/github/v/release/kugland/neocities-deploy)](https://github.com/kugland/neocities-deploy/releases/latest)
 [![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/kugland/neocities-deploy/.github%2Fworkflows%2Fci.yml)](https://github.com/kugland/neocities-deploy/actions/workflows/ci.yml)
 [![AUR Version](https://img.shields.io/aur/version/neocities-deploy)](https://aur.archlinux.org/packages/neocities-deploy)
 [![License](https://img.shields.io/github/license/kugland/neocities-deploy)](./LICENSE)
