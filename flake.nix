@@ -54,6 +54,7 @@
           default = config.apps.neocities-deploy;
         };
         devshells.default = {
+          packages = [pkgs.pacman];
           commands = [
             {
               help = "Update AUR distribution files";
