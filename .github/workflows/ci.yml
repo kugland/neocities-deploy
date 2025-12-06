@@ -33,6 +33,8 @@ env:
 jobs:
   sanity-checks:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
       - name: Version sanity checks
@@ -84,7 +86,10 @@ jobs:
     needs: sanity-checks
     name: "${{ matrix.platform.target }} / ${{ matrix.toolchain }}"
     runs-on: ${{ matrix.platform.os }}
-
+    # TODO: Split into separate jobs for tests and releases, with only the release job
+    # needing write permissions. Will require sharing artifacts between jobs.
+    permissions:
+      contents: write
     strategy:
       fail-fast: false
       matrix:
