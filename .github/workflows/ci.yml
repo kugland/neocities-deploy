@@ -1,3 +1,5 @@
+name: Test and draft release
+
 on:
   push:
     branches:
