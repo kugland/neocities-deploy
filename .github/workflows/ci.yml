@@ -1,4 +1,4 @@
-name: Test and draft release
+name: Test / Build / Draft Release
 
 on:
   push:
@@ -32,6 +32,7 @@ env:
 
 jobs:
   sanity-checks:
+    name: "Sanity Checks"
     runs-on: ubuntu-latest
     permissions:
       contents: read
