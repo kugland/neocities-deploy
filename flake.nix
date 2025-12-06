@@ -54,7 +54,7 @@
           default = config.apps.neocities-deploy;
         };
         devshells.default = {
-          packages = [pkgs.pacman];
+          packages = [pkgs.git pkgs.pacman];
           commands = [
             {
               help = "Update AUR distribution files";
@@ -76,18 +76,18 @@
                       neocities-deploy|neocities-deploy-bin)
                         sed -i "s/^pkgver=.*/pkgver=${version}/" PKGBUILD
                         sed -i "s/^pkgrel=.*/pkgrel=1/" PKGBUILD
-                        ${pkgs.pacman}/bin/makepkg --config ${makepkgConf} --geninteg | while read -r line; do
+                        makepkg --config ${makepkgConf} --geninteg | while read -r line; do
                           var="''${line%%=*}"
                           sed -i "s|^$var=.*|$line|" PKGBUILD
                         done
-                        ${pkgs.pacman}/bin/makepkg --config ${makepkgConf} --printsrcinfo > .SRCINFO
+                        makepkg --config ${makepkgConf} --printsrcinfo > .SRCINFO
                         rm -rf neocities-deploy-* src/
                       ;;
                       neocities-deploy-git)
-                        VERSION="$( source PKGBUILD; srcdir=. _pkgname=. GIT_DIR=../../.git pkgver )"
+                        VERSION="$(source PKGBUILD; srcdir=. _pkgname=. GIT_DIR=../../.git pkgver)"
                         sed -i "s/^pkgver=.*/pkgver=$VERSION/" PKGBUILD
                         sed -i "s/^pkgrel=.*/pkgrel=1/" PKGBUILD
-                        ${pkgs.pacman}/bin/makepkg --config ${makepkgConf} --printsrcinfo > .SRCINFO
+                        makepkg --config ${makepkgConf} --printsrcinfo > .SRCINFO
                       ;;
                     esac
                   ); done
