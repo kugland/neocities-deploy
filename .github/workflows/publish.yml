@@ -1,8 +1,10 @@
 name: Publish to crates.io
 
 on:
-  push:
-    tags: ['v*']  # Triggers when pushing tags starting with 'v'
+  workflow_run:
+    workflows: ["Test / Build / Draft Release"]
+    types: [completed]
+    branches: [master]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -13,6 +15,7 @@ env:
 
 jobs:
   publish:
+    if: github.event.workflow_run.conclusion == 'success' && startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     environment: publish  # Optional: for enhanced security
     permissions:
