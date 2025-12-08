@@ -1,8 +1,8 @@
-use assert_cmd::prelude::*;
+use assert_cmd::Command;
 use indoc::indoc;
 use mockito::Server;
 use predicates::str::{contains, starts_with};
-use std::{env, process::Command};
+use std::env;
 
 mod common;
 
@@ -47,6 +47,7 @@ fn test_list() {
 
     env::set_var("NEOCITIES_DEPLOY_API_URL", server.url());
 
+    #[allow(deprecated)]
     let mut cmd = Command::cargo_bin(env!("CARGO_PKG_NAME")).unwrap();
     let config = common::config_file("username:password", "/path/to/lorem");
 
@@ -54,10 +55,10 @@ fn test_list() {
     cmd.assert()
         .success()
         .stdout(starts_with("Listing site lorem.com"))
-        .stdout(contains("         images/"))
-        .stdout(contains("16.8 KB  images/cat.png"))
-        .stdout(contains(" 1.0 KB  index.html"))
-        .stdout(contains("  271 B  not_found.html"));
+        .stdout(contains("          images/"))
+        .stdout(contains("16.4 KiB  images/cat.png"))
+        .stdout(contains("  1023 B  index.html"))
+        .stdout(contains("   271 B  not_found.html"));
 
     mock.assert();
 }

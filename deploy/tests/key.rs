@@ -1,9 +1,9 @@
-use assert_cmd::prelude::*;
+use assert_cmd::Command;
 use indoc::indoc;
 use mockito::Server;
 use predicates::str::{contains, starts_with};
 use serial_test::serial;
-use std::{collections::HashMap, env, process::Command};
+use std::{collections::HashMap, env};
 
 mod common;
 
@@ -24,6 +24,7 @@ fn test_key() {
 
     env::set_var("NEOCITIES_DEPLOY_API_URL", server.url());
 
+    #[allow(deprecated)]
     let mut cmd = Command::cargo_bin(env!("CARGO_PKG_NAME")).unwrap();
     let config = common::config_file("username:password", "/path/to/lorem");
 
@@ -67,6 +68,7 @@ fn test_key_error() {
 
     env::set_var("NEOCITIES_DEPLOY_API_URL", server.url());
 
+    #[allow(deprecated)]
     let mut cmd = Command::cargo_bin(env!("CARGO_PKG_NAME")).unwrap();
     let config = common::config_file("username:password", "/path/to/lorem");
 
