@@ -197,7 +197,7 @@ jobs:
       contents: write
     steps:
       - name: Download all artifacts
-        uses: actions/download-artifact@v4.1.3
+        uses: actions/download-artifact@v4.3.0
         with:
           pattern: neocities-deploy-*-stable
           merge-multiple: true
