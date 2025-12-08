@@ -107,8 +107,10 @@
                   export GIT_DIR=.git
                   export GIT_WORK_TREE=.
                   git add PKGBUILD .SRCINFO
-                  git commit -m "Update to version ${version}"
-                  git push origin master
+                  VERSION="$(source PKGBUILD; echo $pkgver)"
+                  git commit -m "Update to version $VERSION" \
+                    && git push origin master \
+                    || echo "No changes to commit"
                   rm -rf .git
                 ); done
               '');

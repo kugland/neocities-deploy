@@ -1,0 +1,88 @@
+name: Update AUR Packages
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+jobs:
+  aur-update:
+    name: "Update AUR Packages"
+    runs-on: ubuntu-latest
+    environment: aur
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@v14
+
+      - name: Setup SSH and GIT for AUR
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.AUR_SSH_KEY }}" > ~/.ssh/aur
+          chmod 600 ~/.ssh/aur
+          cat >> ~/.ssh/config << EOF
+          Host aur.archlinux.org
+            IdentityFile ~/.ssh/aur
+            User aur
+            StrictHostKeyChecking accept-new
+          EOF
+
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "kugland+github+ci+bot@gmail.com"
+
+      - name: Setup GPG for commit signing
+        env:
+          AUR_GPG_PRIVATE: ${{ secrets.AUR_GPG_PRIVATE }}
+          AUR_GPG_PUBLIC: ${{ secrets.AUR_GPG_PUBLIC }}
+        run: |
+          mkdir -p ~/.gnupg
+          chmod 700 ~/.gnupg
+          export GNUPGHOME="$HOME/.gnupg"
+
+          if [ -z "$AUR_GPG_PRIVATE" ]; then
+            echo "AUR_GPG_PRIVATE secret is empty"
+            exit 1
+          fi
+
+          # Import private and public keys
+          echo "$AUR_GPG_PRIVATE" | gpg --batch --import
+          if [ -n "$AUR_GPG_PUBLIC" ]; then
+            echo "$AUR_GPG_PUBLIC" | gpg --batch --import
+          fi
+
+          # Find the first secret key ID (long keyid/fingerprint)
+          KEYID=$(gpg --list-secret-keys --with-colons | awk -F: '/^sec/{print $5; exit}')
+          if [ -z "$KEYID" ]; then
+            echo "No GPG secret key found after import"
+            gpg --list-secret-keys
+            exit 1
+          fi
+
+          # Trust the imported key
+          echo "$KEYID:6:" | gpg --import-ownertrust || true
+
+          # Configure git to sign commits with this key
+          git config --global user.signingkey "$KEYID"
+          git config --global gpg.program gpg
+          git config --global commit.gpgSign true
+
+      - name: Update AUR distribution files
+        run: nix develop -c aur-update
+
+      - name: Push updates to AUR
+        run: nix develop -c aur-push
+
+      - name: Commit to this repository
+        run: |
+          git add .
+          git commit -m "Updated AUR packages to version" || echo "No changes to commit" \
+            && git push origin HEAD:master
