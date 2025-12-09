@@ -19,7 +19,7 @@ rust-version = "1.82.0"
 indoc = "2.0.5"
 log = "0.4.21"
 mockito = "1.4.0"
-parse-display = { version = "0.9.1", default-features = false }
+parse-display = { version = "0.10.0", default-features = false }
 serde = { version = "1.0.200", features = ["derive"] }
 
 [profile.dev]
