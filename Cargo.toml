@@ -13,7 +13,7 @@ repository = "https://github.com/kugland/neocities-deploy"
 version = "0.1.20"
 edition = "2021"
 license = "GPL-3.0"
-rust-version = "1.74.1"
+rust-version = "1.82.0"
 
 [workspace.dependencies]
 indoc = "2.0.5"
