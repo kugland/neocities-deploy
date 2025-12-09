@@ -17,7 +17,7 @@ clap = { version = "4.5.27", features = ["derive"] }
 directories = "6.0.0"
 ignore = "0.4.22"
 indexmap = { version = "2.2.6", features = ["serde"] }
-inquire = "0.7.4"
+inquire = "0.9.0"
 itertools = "0.14.0"
 log.workspace = true
 neocities-client = { path = "../client" }
@@ -25,7 +25,7 @@ parse-display.workspace = true
 pretty_env_logger = "0.5.0"
 serde.workspace = true
 sha1 = "0.10.6"
-toml = { version = "0.8.12", features = ["preserve_order"] }
+toml = { version = "0.9.0", features = ["preserve_order"] }
 url = "2.5.0"
 
 [dev-dependencies]
