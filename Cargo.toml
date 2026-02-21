@@ -18,7 +18,7 @@ rust-version = "1.82.0"
 [workspace.dependencies]
 indoc = "2.0.5"
 log = "0.4.21"
-mockito = "1.4.0"
+mockito = "1.7.2"
 parse-display = { version = "0.10.0", default-features = false }
 serde = { version = "1.0.200", features = ["derive"] }
 
