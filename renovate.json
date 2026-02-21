@@ -3,5 +3,7 @@
   "extends": [
     "config:recommended"
   ],
-  "baseBranches": ["master"]
+  "baseBranchPatterns": [
+    "master"
+  ]
 }
