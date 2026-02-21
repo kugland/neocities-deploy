@@ -21,7 +21,7 @@
 use crate::{Error, ErrorKind, Result};
 use serde::{de::Error as SerdeError, Deserialize};
 use serde_json::Value;
-use ureq::Response;
+use ureq::{http::Response, Body};
 
 /// Type for the response of the `/api/info` endpoint.
 ///
@@ -72,7 +72,7 @@ pub struct ListEntry {
 
 /// Extract a struct representing the API’s response from a HTTP response.
 #[allow(clippy::result_large_err)]
-pub(crate) fn parse_response<T>(field: &'static str, res: Response) -> Result<T>
+pub(crate) fn parse_response<T>(field: &'static str, mut res: Response<Body>) -> Result<T>
 where
     T: serde::de::DeserializeOwned,
 {
@@ -92,10 +92,14 @@ where
     }
 
     // Save these for later.
-    let status = res.status();
-    let status_text = res.status_text().to_owned();
+    let status = res.status().as_u16();
+    let status_text = res
+        .status()
+        .canonical_reason()
+        .unwrap_or("Unknown")
+        .to_owned();
 
-    serde_json::from_reader::<_, Value>(res.into_reader()) // First, parse the JSON.
+    serde_json::from_reader::<_, Value>(res.body_mut().as_reader()) // First, parse the JSON.
         .map_err(Error::from)
         .and_then(|json| {
             // Let's first try to deserialize the outer response, which contains the type of the
@@ -141,6 +145,14 @@ where
 mod tests {
     use super::*;
 
+    fn make_response(status: u16, body: &'static str) -> Response<Body> {
+        let body = Body::builder().mime_type("application/json").data(body);
+        ureq::http::Response::builder()
+            .status(status)
+            .body(body)
+            .unwrap()
+    }
+
     #[test]
     fn parse_success() {
         #[derive(Deserialize)]
@@ -148,9 +160,8 @@ mod tests {
             foo: String,
             bar: String,
         }
-        let res = ureq::Response::new(
+        let res = make_response(
             200,
-            "OK",
             r#"
                 {
                     "result": "success",
@@ -161,8 +172,7 @@ mod tests {
                     "we": ["don't", "care", "about", "other", "fields"]
                 }
             "#,
-        )
-        .unwrap();
+        );
         let foo = parse_response::<Foobar>("foobar", res).unwrap();
         assert_eq!(foo.foo, "qux");
         assert_eq!(foo.bar, "baz");
@@ -172,9 +182,8 @@ mod tests {
     fn parse_error() {
         // Here we should get an `Error::Api` with `kind` set to `ErrorKind::InvalidAuth`, since
         // even though we are getting a 401 status code, the response is still a valid JSON object.
-        let res = ureq::Response::new(
+        let res = make_response(
             401,
-            "Unauthorized",
             r#"
                 {
                     "result": "error",
@@ -182,8 +191,7 @@ mod tests {
                     "message": "Invalid API key"
                 }
             "#,
-        )
-        .unwrap();
+        );
         let err = parse_response::<String>("foobar", res).unwrap_err();
         assert!(matches!(
             err,
@@ -198,7 +206,7 @@ mod tests {
     fn parse_invalid_json() {
         // Here we should get an `Error::Json`, since the response is not a valid JSON object, and
         // the status code is not 4xx or 5xx.
-        let res = ureq::Response::new(200, "OK", "not json").unwrap();
+        let res = make_response(200, "not json");
         let err = parse_response::<String>("foobar", res).unwrap_err();
         assert!(matches!(err, Error::Json { .. }));
     }
@@ -207,7 +215,7 @@ mod tests {
     fn parse_invalid_json_error() {
         // Here we should get an `Error::Api` with `kind` set to `ErrorKind::Status`, since the
         // response is not a valid JSON object, and the status code is 4xx or 5xx.
-        let res = ureq::Response::new(401, "Unauthorized", "not json").unwrap();
+        let res = make_response(401, "not json");
         let err = parse_response::<String>("foobar", res).unwrap_err();
         let Error::Api { message, kind } = err else {
             panic!("Expected an Error::Api {{ .. }}, got {:?}", err);

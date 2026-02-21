@@ -25,7 +25,8 @@ use form_data_builder::FormData;
 use std::{ffi::OsStr, io::Cursor};
 use tap::prelude::*;
 use typed_path::Utf8UnixPath;
-use ureq::{Agent, OrAnyStatus, Request};
+use ureq::{Agent, RequestBuilder};
+use ureq::typestate::{WithBody, WithoutBody};
 
 /// Default base URL for the Neocities API.
 const DEFAULT_BASE_URL: &str = "https://neocities.org/api";
@@ -117,7 +118,7 @@ pub struct Client {
     ///
     /// Override this if you want to customize the [`Agent`](ureq::Agent), for example, to use a
     /// proxy, to set a timeout, to add middlewares, *&c*.
-    #[builder(default = "ureq::builder().build()")]
+    #[builder(default = "Agent::config_builder().http_status_as_error(false).build().into()")]
     ureq_agent: Agent,
     /// Base URL for the Neocities API.
     ///
@@ -151,9 +152,8 @@ impl Client {
             .iter()
             .map(|path| ("filenames[]", *path))
             .collect::<Vec<_>>();
-        self.make_request("POST", "delete")
-            .send_form(&form)
-            .or_any_status()
+        self.make_post_request("delete")
+            .send_form(form)
             .map_err(Error::from)
             .and_then(|res| parse_response::<String>("message", res))
             .tap_ok_dbg(|msg| log::trace!("{}", msg))
@@ -165,9 +165,8 @@ impl Client {
     pub fn info(&self) -> Result<Info> {
         #[cfg(debug_assertions)]
         log::trace!("Getting website info");
-        self.make_request("GET", "info")
+        self.make_get_request("info")
             .call()
-            .or_any_status()
             .map_err(Error::from)
             .and_then(|res| parse_response::<Info>("info", res))
             .tap_ok_dbg(|info| log::trace!("{:?}", info))
@@ -178,9 +177,8 @@ impl Client {
     pub fn key(&self) -> Result<String> {
         #[cfg(debug_assertions)]
         log::trace!("Getting API key");
-        self.make_request("GET", "key")
+        self.make_get_request("key")
             .call()
-            .or_any_status()
             .map_err(Error::from)
             .and_then(|res| parse_response::<String>("api_key", res))
             .tap_ok_dbg(|_| log::trace!("Got an API key: <redacted>"))
@@ -191,9 +189,8 @@ impl Client {
     pub fn list(&self) -> Result<Vec<ListEntry>> {
         #[cfg(debug_assertions)]
         log::trace!("Listing files");
-        self.make_request("GET", "list")
+        self.make_get_request("list")
             .call()
-            .or_any_status()
             .map_err(Error::from)
             .and_then(|res| parse_response::<Vec<ListEntry>>("files", res))
             .tap_ok_dbg(|list| log::trace!("{:?}", list))
@@ -241,10 +238,9 @@ impl Client {
             .tap_err(|e| log::debug!("{}", e))
             .expect("Failed to finish form data"); // Same as above.
         let content_type = form.content_type_header();
-        self.make_request("POST", "upload")
-            .set("Content-Type", &content_type)
-            .send_bytes(&post_body)
-            .or_any_status()
+        self.make_post_request("upload")
+            .header("Content-Type", &content_type)
+            .send(&post_body[..])
             .map_err(Error::from)
             .and_then(|res| parse_response::<String>("message", res))
             .tap_ok_dbg(|list| log::trace!("{:?}", list))
@@ -280,18 +276,30 @@ impl Client {
 
     // ------------------------------------ Private methods ------------------------------------ //
 
-    /// Build a new request with the given method and path.
+    /// Build a new GET request with the given path.
     ///
-    /// This method will set the appropriate headers, including the `Authorization` header if
-    /// the the `auth` field is set.
-    fn make_request(&self, method: &str, path: &str) -> Request {
+    /// This method will set the appropriate headers, including the `Authorization` header.
+    fn make_get_request(&self, path: &str) -> RequestBuilder<WithoutBody> {
         let path = format!("{}/{}", self.base_url, path);
         self.ureq_agent
-            .request(method, &path)
-            .set("User-Agent", &self.user_agent)
-            .set("Accept", "application/json")
-            .set("Accept-Charset", "utf-8")
-            .set("Authorization", &self.auth.header())
+            .get(&path)
+            .header("User-Agent", &self.user_agent)
+            .header("Accept", "application/json")
+            .header("Accept-Charset", "utf-8")
+            .header("Authorization", &self.auth.header())
+    }
+
+    /// Build a new POST request with the given path.
+    ///
+    /// This method will set the appropriate headers, including the `Authorization` header.
+    fn make_post_request(&self, path: &str) -> RequestBuilder<WithBody> {
+        let path = format!("{}/{}", self.base_url, path);
+        self.ureq_agent
+            .post(&path)
+            .header("User-Agent", &self.user_agent)
+            .header("Accept", "application/json")
+            .header("Accept-Charset", "utf-8")
+            .header("Authorization", &self.auth.header())
     }
 }
 
