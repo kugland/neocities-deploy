@@ -23,7 +23,7 @@ use clap::{ArgAction::Count, Parser};
 use directories::ProjectDirs;
 use indexmap::IndexMap;
 use neocities_client::{
-    ureq::{AgentBuilder, Proxy},
+    ureq::{Agent, Proxy},
     Auth, Client,
 };
 use serde::{Deserialize, Serialize};
@@ -197,11 +197,11 @@ impl Site {
     pub fn build_client(&self) -> Result<Client> {
         let auth = self.auth.clone();
         let agent = {
-            let mut builder = AgentBuilder::new();
+            let mut builder = Agent::config_builder().http_status_as_error(false);
             if let Some(proxy) = &self.proxy {
-                builder = builder.proxy(Proxy::new(proxy)?)
+                builder = builder.proxy(Some(Proxy::new(proxy)?));
             }
-            builder.build()
+            builder.build().into()
         };
         let client = {
             let mut client_builder = Client::builder();

@@ -25,7 +25,7 @@ use thiserror::Error as ThisError;
 pub enum Error {
     /// Transport errors returned by [`ureq`].
     #[error("Transport error: {0}")]
-    Transport(#[from] ureq::Transport),
+    Transport(#[from] ureq::Error),
 
     /// Errors when deserializing JSON.
     #[error("JSON error: {0}")]
