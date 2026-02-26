@@ -182,7 +182,7 @@ jobs:
 
       - if: matrix.toolchain == 'stable' && startsWith( github.ref, 'refs/tags/v' )
         name: Upload build artifacts
-        uses: actions/upload-artifact@v6.0.0
+        uses: actions/upload-artifact@v7.0.0
         with:
           name: neocities-deploy-${{ matrix.platform.os_name }}-${{ matrix.toolchain }}
           path: ${{ matrix.platform.name }}
@@ -197,7 +197,7 @@ jobs:
       contents: write
     steps:
       - name: Download all artifacts
-        uses: actions/download-artifact@v7.0.0
+        uses: actions/download-artifact@v8.0.0
         with:
           pattern: neocities-deploy-*-stable
           merge-multiple: true
