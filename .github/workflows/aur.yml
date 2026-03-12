@@ -76,10 +76,10 @@ jobs:
           git config --global commit.gpgSign true
 
       - name: Update AUR distribution files
-        run: nix develop -c aur-update
+        run: nix develop .#aur -c update
 
       - name: Push updates to AUR
-        run: nix develop -c aur-push
+        run: nix develop .#aur -c push
 
       - name: Commit to this repository
         run: |
