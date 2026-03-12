@@ -1,5 +1,6 @@
 ---
 agent: agent
+description: Publish a new release of this project.
 model: Auto (copilot)
 ---
 To publish a new release of this project, follow these steps:
