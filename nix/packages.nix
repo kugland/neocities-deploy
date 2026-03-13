@@ -1,4 +1,6 @@
-{version, ...}: {
+let
+  inherit ((builtins.fromTOML (builtins.readFile ../Cargo.toml)).workspace.package) version;
+in {
   perSystem = {
     pkgs,
     config,
@@ -9,7 +11,7 @@
         pname = "neocities-deploy";
         inherit version;
         cargoLock.lockFile = ../Cargo.lock;
-        src = pkgs.lib.cleanSource ./.;
+        src = pkgs.lib.cleanSource ../.;
         doCheck = false; # Checks are impure due to reliance on network access
         meta = with pkgs.lib; {
           description = "A command-line tool for deploying your Neocities site";

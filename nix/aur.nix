@@ -1,7 +1,8 @@
-{version, ...}: {
+{
   perSystem = {
     pkgs,
     config,
+    self',
     ...
   }: {
     devshells.aur = {
@@ -25,7 +26,7 @@
                 cd aur/$dir
                 case $dir in
                   neocities-deploy|neocities-deploy-bin)
-                    sed -i "s/^pkgver=.*/pkgver=${version}/" PKGBUILD
+                    sed -i "s/^pkgver=.*/pkgver=${self'.packages.default.version}/" PKGBUILD
                     sed -i "s/^pkgrel=.*/pkgrel=1/" PKGBUILD
                     makepkg --config ${makepkgConf} --geninteg | while read -r line; do
                       var="''${line%%=*}"

@@ -10,11 +10,6 @@
 
   outputs = inputs @ {flake-parts, ...}:
     flake-parts.lib.mkFlake {inherit inputs;} {
-      _module.args = let
-        cargoToml = builtins.fromTOML (builtins.readFile ./Cargo.toml);
-      in {
-        inherit (cargoToml.workspace.package) version;
-      };
       imports = [
         inputs.devshell.flakeModule
         ./nix/apps.nix
