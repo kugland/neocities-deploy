@@ -83,55 +83,55 @@ jobs:
             os: ubuntu-latest
             target: x86_64-unknown-linux-musl
             bin: neocities-deploy
-            name: neocities-deploy-Linux-x86_64-musl.tar.gz
+            suffix: Linux-x86_64-musl.tar.gz
           - os_name: Linux-aarch64
             os: ubuntu-latest
             target: aarch64-unknown-linux-musl
             bin: neocities-deploy
-            name: neocities-deploy-Linux-aarch64-musl.tar.gz
+            suffix: Linux-aarch64-musl.tar.gz
           - os_name: Linux-arm
             os: ubuntu-latest
             target: arm-unknown-linux-musleabi
             bin: neocities-deploy
-            name: neocities-deploy-Linux-arm-musl.tar.gz
+            suffix: Linux-arm-musl.tar.gz
           - os_name: Linux-i686
             os: ubuntu-latest
             target: i686-unknown-linux-musl
             bin: neocities-deploy
-            name: neocities-deploy-Linux-i686-musl.tar.gz
+            suffix: Linux-i686-musl.tar.gz
             skip_tests: true
           - os_name: Linux-riscv64
             os: ubuntu-latest
             target: riscv64gc-unknown-linux-gnu
             bin: neocities-deploy
-            name: neocities-deploy-Linux-riscv64gc-gnu.tar.gz
+            suffix: Linux-riscv64gc-gnu.tar.gz
           - os_name: Windows-aarch64
             os: windows-latest
             target: aarch64-pc-windows-msvc
             bin: neocities-deploy.exe
-            name: neocities-deploy-Windows-aarch64.zip
+            suffix: Windows-aarch64.zip
             skip_tests: true
           - os_name: Windows-i686
             os: windows-latest
             target: i686-pc-windows-msvc
             bin: neocities-deploy.exe
-            name: neocities-deploy-Windows-i686.zip
+            suffix: Windows-i686.zip
             skip_tests: true
           - os_name: Windows-x86_64
             os: windows-latest
             target: x86_64-pc-windows-msvc
             bin: neocities-deploy.exe
-            name: neocities-deploy-Windows-x86_64.zip
+            suffix: Windows-x86_64.zip
           - os_name: macOS-x86_64
             os: macOS-latest
             target: x86_64-apple-darwin
             bin: neocities-deploy
-            name: neocities-deploy-Darwin-x86_64.tar.gz
+            suffix: Darwin-x86_64.tar.gz
           - os_name: macOS-aarch64
             os: macOS-latest
             target: aarch64-apple-darwin
             bin: neocities-deploy
-            name: neocities-deploy-Darwin-aarch64.tar.gz
+            suffix: Darwin-aarch64.tar.gz
             skip_tests: true
         toolchain:
           - stable
@@ -146,7 +146,14 @@ jobs:
           git config --global user.email "jdoe@example.com"
           git config --global user.name "J. Doe"
 
-      - if: contains(matrix.platform.name, 'musl')
+      - name: Get version from Cargo.toml
+        id: get-version
+        shell: bash
+        run: |
+          VERSION="$(sed -En '/^\s*version\s*=\s*"([^"]+)"$/{s//\1/; p}' Cargo.toml)"
+          echo "VERSION=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - if: contains(matrix.platform.target, 'musl')
         name: Install musl-tools on Linux
         run: sudo apt-get update --yes && sudo apt-get install --yes musl-tools
 
@@ -172,11 +179,12 @@ jobs:
         name: Package as archive
         shell: bash
         run: |
+          ARCHIVE_NAME="neocities-deploy-${{ steps.get-version.outputs.VERSION }}-${{ matrix.platform.suffix }}"
           cd target/${{ matrix.platform.target }}/release
           if [[ "${{ matrix.platform.os }}" == "windows-latest" ]]; then
-            7z a ../../../${{ matrix.platform.name }} ${{ matrix.platform.bin }}
+            7z a ../../../"$ARCHIVE_NAME" ${{ matrix.platform.bin }}
           else
-            tar czvf ../../../${{ matrix.platform.name }} ${{ matrix.platform.bin }}
+            tar czvf ../../../"$ARCHIVE_NAME" ${{ matrix.platform.bin }}
           fi
           cd -
 
@@ -185,7 +193,7 @@ jobs:
         uses: actions/upload-artifact@v7.0.0
         with:
           name: neocities-deploy-${{ matrix.platform.os_name }}-${{ matrix.toolchain }}
-          path: ${{ matrix.platform.name }}
+          path: neocities-deploy-${{ steps.get-version.outputs.VERSION }}-${{ matrix.platform.suffix }}
           if-no-files-found: error
 
   draft-release:
