@@ -14,6 +14,7 @@
         inputs.devshell.flakeModule
         ./nix/apps.nix
         ./nix/aur.nix
+        ./nix/develop.nix
         ./nix/packages.nix
       ];
       systems = [
