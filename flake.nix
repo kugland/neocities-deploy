@@ -15,6 +15,7 @@
         ./nix/apps.nix
         ./nix/aur.nix
         ./nix/packages.nix
+        ./nix/develop.nix
       ];
       systems = [
         "i686-linux"
