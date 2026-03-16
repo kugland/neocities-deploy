@@ -1,7 +1,7 @@
 ////////       This file is part of the source code for neocities-deploy, a command-       ////////
 ////////       line tool for deploying your Neocities site.                                ////////
 ////////                                                                                   ////////
-////////                           Copyright © 2024  André Kugland                         ////////
+////////                       Copyright © 2024–2026   André Kugland                       ////////
 ////////                                                                                   ////////
 ////////       This program is free software: you can redistribute it and/or modify        ////////
 ////////       it under the terms of the GNU General Public License as published by        ////////
