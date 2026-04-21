@@ -152,7 +152,7 @@ jobs:
 
       - if: ${{ !matrix.platform.skip_tests }}
         name: Run tests
-        uses: houseabsolute/actions-rust-cross@v0
+        uses: houseabsolute/actions-rust-cross@v1.0.6
         with:
           command: "test"
           target: ${{ matrix.platform.target }}
@@ -160,7 +160,7 @@ jobs:
           args: "--locked --no-fail-fast"
 
       - name: Build binary
-        uses: houseabsolute/actions-rust-cross@v0
+        uses: houseabsolute/actions-rust-cross@v1.0.6
         with:
           command: "build"
           target: ${{ matrix.platform.target }}
