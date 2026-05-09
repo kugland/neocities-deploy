@@ -20,11 +20,13 @@ use assert_cmd::Command;
 use indoc::indoc;
 use mockito::Server;
 use predicates::str::{contains, starts_with};
+use serial_test::serial;
 use std::env;
 
 mod common;
 
 #[test]
+#[serial]
 fn test_list() {
     let mut server = Server::new();
 
@@ -77,6 +79,101 @@ fn test_list() {
         .stdout(contains("16.4 KiB  images/cat.png"))
         .stdout(contains("  1023 B  index.html"))
         .stdout(contains("   271 B  not_found.html"));
+
+    mock.assert();
+}
+
+#[test]
+#[serial]
+fn test_list_api_error_propagates() {
+    let mut server = Server::new();
+    let mock = server
+        .mock("GET", "/list")
+        .with_status(200)
+        .with_header("Content-Type", "application/json")
+        .with_body(indoc! {r#"{
+            "result": "error",
+            "error_type": "invalid_auth",
+            "message": "bad credentials"
+        }"#})
+        .create();
+
+    env::set_var("NEOCITIES_DEPLOY_API_URL", server.url());
+
+    #[allow(deprecated)]
+    let mut cmd = Command::cargo_bin(env!("CARGO_PKG_NAME")).unwrap();
+    let config = common::config_file("username:password", "/path/to/lorem");
+
+    cmd.arg("list").arg("--config").arg(config.path());
+    cmd.assert().failure().stderr(contains("bad credentials"));
+
+    mock.assert();
+}
+
+#[test]
+#[serial]
+fn test_list_ignore_errors_succeeds() {
+    let mut server = Server::new();
+    let mock = server
+        .mock("GET", "/list")
+        .with_status(200)
+        .with_header("Content-Type", "application/json")
+        .with_body(indoc! {r#"{
+            "result": "error",
+            "error_type": "invalid_auth",
+            "message": "bad credentials"
+        }"#})
+        .create();
+
+    env::set_var("NEOCITIES_DEPLOY_API_URL", server.url());
+
+    #[allow(deprecated)]
+    let mut cmd = Command::cargo_bin(env!("CARGO_PKG_NAME")).unwrap();
+    let config = common::config_file("username:password", "/path/to/lorem");
+
+    cmd.arg("--ignore-errors")
+        .arg("list")
+        .arg("--config")
+        .arg(config.path());
+    cmd.assert().success();
+
+    mock.assert();
+}
+
+#[test]
+#[serial]
+fn test_list_multi_site() {
+    let mut server = Server::new();
+    let mock = server
+        .mock("GET", "/list")
+        .with_status(200)
+        .with_header("Content-Type", "application/json")
+        .with_body(indoc! {r#"{
+            "result": "success",
+            "files": [{
+                "path": "x.html",
+                "is_directory": false,
+                "size": 10,
+                "updated_at": "Sat, 13 Feb 2016 03:04:00 -0000",
+                "sha1_hash": "0000000000000000000000000000000000000000"
+            }]
+        }"#})
+        .expect(2)
+        .create();
+
+    env::set_var("NEOCITIES_DEPLOY_API_URL", server.url());
+
+    #[allow(deprecated)]
+    let mut cmd = Command::cargo_bin(env!("CARGO_PKG_NAME")).unwrap();
+    let p1 = std::path::Path::new("/path/to/a");
+    let p2 = std::path::Path::new("/path/to/b");
+    let config = common::config_file_multi(&[("alpha.com", "k1", p1), ("beta.com", "k2", p2)]);
+
+    cmd.arg("list").arg("--config").arg(config.path());
+    cmd.assert()
+        .success()
+        .stdout(contains("Listing site alpha.com"))
+        .stdout(contains("Listing site beta.com"));
 
     mock.assert();
 }

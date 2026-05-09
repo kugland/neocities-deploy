@@ -16,25 +16,30 @@
 ////////       You should have received a copy of the GNU General Public License           ////////
 ////////       along with this program. If not, see https://www.gnu.org/licenses/.         ////////
 
-use std::{collections::HashMap, io::Write, path::Path};
+#![allow(dead_code)]
+
+use std::{io::Write, path::Path};
 use tempfile::NamedTempFile;
 
+/// Build a single-site config file. Kept for backward compatibility with existing tests.
 pub fn config_file(auth: &str, path: impl AsRef<Path>) -> NamedTempFile {
+    config_file_multi(&[("lorem.com", auth, path.as_ref())])
+}
+
+/// Build a config file with one or more sites.
+///
+/// Each entry is `(name, auth, path)`. Order is preserved.
+pub fn config_file_multi(sites: &[(&str, &str, &Path)]) -> NamedTempFile {
+    let mut text = String::new();
+    for (name, auth, path) in sites {
+        text.push_str(&format!(
+            "[site.\"{}\"]\nauth = \"{}\"\npath = \"{}\"\n\n",
+            name,
+            auth,
+            path.to_str().unwrap()
+        ));
+    }
     let mut file = NamedTempFile::new().unwrap();
-    let path = path.as_ref().to_str().unwrap();
-
-    let mut site_map = HashMap::new();
-    site_map.insert("auth", auth);
-    site_map.insert("path", path);
-
-    let mut lorem_map = HashMap::new();
-    lorem_map.insert("lorem.com", site_map);
-
-    let mut config_map = HashMap::new();
-    config_map.insert("site", lorem_map);
-
-    let toml = toml::to_string(&config_map).unwrap();
-
-    file.write_all(toml.as_bytes()).unwrap();
+    file.write_all(text.as_bytes()).unwrap();
     file
 }

@@ -124,3 +124,170 @@ impl Action {
             })
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::trees::FileInfo;
+    use std::path::PathBuf;
+
+    fn file(path: &str, sha: &str) -> Entry {
+        Entry {
+            path: path.to_owned(),
+            info: Some(FileInfo {
+                size: 1,
+                sha1_sum: sha.to_owned(),
+            }),
+            local_path: Some(PathBuf::from(path)),
+        }
+    }
+
+    fn dir(path: &str) -> Entry {
+        Entry {
+            path: path.to_owned(),
+            info: None,
+            local_path: Some(PathBuf::from(path)),
+        }
+    }
+
+    #[test]
+    fn strategy_empty() {
+        assert_eq!(Action::make_strategy(vec![], vec![]), vec![]);
+    }
+
+    #[test]
+    fn strategy_local_only_file() {
+        let local = vec![file("a.txt", "h1")];
+        assert_eq!(
+            Action::make_strategy(local.clone(), vec![]),
+            vec![Action::Upload(local[0].clone())]
+        );
+    }
+
+    #[test]
+    fn strategy_local_only_dir_does_nothing() {
+        let local = vec![dir("subdir")];
+        assert_eq!(Action::make_strategy(local, vec![]), vec![]);
+    }
+
+    #[test]
+    fn strategy_remote_only_file() {
+        let remote = vec![file("a.txt", "h1")];
+        assert_eq!(
+            Action::make_strategy(vec![], remote.clone()),
+            vec![Action::DeleteRemote(remote[0].clone())]
+        );
+    }
+
+    #[test]
+    fn strategy_remote_only_dir() {
+        let remote = vec![dir("subdir")];
+        assert_eq!(
+            Action::make_strategy(vec![], remote.clone()),
+            vec![Action::DeleteRemote(remote[0].clone())]
+        );
+    }
+
+    #[test]
+    fn strategy_same_file_no_action() {
+        let local = vec![file("a.txt", "h1")];
+        let remote = vec![file("a.txt", "h1")];
+        assert_eq!(Action::make_strategy(local, remote), vec![]);
+    }
+
+    #[test]
+    fn strategy_diff_file_uploads() {
+        let local = vec![file("a.txt", "h1")];
+        let remote = vec![file("a.txt", "h2")];
+        assert_eq!(
+            Action::make_strategy(local.clone(), remote),
+            vec![Action::Upload(local[0].clone())]
+        );
+    }
+
+    #[test]
+    fn strategy_local_file_remote_dir() {
+        let local = vec![file("x", "h1")];
+        let remote = vec![dir("x")];
+        assert_eq!(
+            Action::make_strategy(local.clone(), remote.clone()),
+            vec![
+                Action::DeleteRemote(remote[0].clone()),
+                Action::Upload(local[0].clone()),
+            ]
+        );
+    }
+
+    #[test]
+    fn strategy_local_dir_remote_file() {
+        let local = vec![dir("x")];
+        let remote = vec![file("x", "h1")];
+        assert_eq!(
+            Action::make_strategy(local, remote.clone()),
+            vec![Action::DeleteRemote(remote[0].clone())]
+        );
+    }
+
+    #[test]
+    fn strategy_dedup_children_of_deleted_dir() {
+        let remote = vec![
+            dir("subdir"),
+            file("subdir/a.txt", "h1"),
+            file("subdir/nested/b.txt", "h2"),
+        ];
+        // Local empty: subdir, subdir/a.txt, subdir/nested/b.txt all marked for deletion,
+        // but only the parent delete should remain.
+        assert_eq!(
+            Action::make_strategy(vec![], remote.clone()),
+            vec![Action::DeleteRemote(remote[0].clone())]
+        );
+    }
+
+    #[test]
+    fn strategy_dedup_only_when_real_child_path() {
+        // "foo" then "foobar" — NOT a child, must not be suppressed.
+        let remote = vec![dir("foo"), file("foobar", "h1")];
+        assert_eq!(
+            Action::make_strategy(vec![], remote.clone()),
+            vec![
+                Action::DeleteRemote(remote[0].clone()),
+                Action::DeleteRemote(remote[1].clone()),
+            ]
+        );
+    }
+
+    #[test]
+    fn strategy_mixed() {
+        let local = vec![
+            file("keep.txt", "h_keep"),
+            file("modified.txt", "h_new"),
+            file("new.txt", "h_new2"),
+            dir("shared_dir"),
+            file("shared_dir/inside.txt", "h_inside"),
+        ];
+        let remote = vec![
+            dir("gone_dir"),
+            file("gone_dir/orphan.txt", "h_orphan"),
+            file("keep.txt", "h_keep"),
+            file("modified.txt", "h_old"),
+            dir("shared_dir"),
+            file("shared_dir/inside.txt", "h_inside"),
+        ];
+        let expected = vec![
+            Action::DeleteRemote(remote[0].clone()), // gone_dir; orphan child suppressed
+            Action::Upload(local[1].clone()),        // modified.txt
+            Action::Upload(local[2].clone()),        // new.txt
+        ];
+        assert_eq!(Action::make_strategy(local, remote), expected);
+    }
+
+    #[test]
+    fn action_display() {
+        let f = file("foo/bar.txt", "h");
+        assert_eq!(Action::Upload(f.clone()).to_string(), "upload foo/bar.txt");
+        assert_eq!(
+            Action::DeleteRemote(f).to_string(),
+            "delete remote foo/bar.txt"
+        );
+    }
+}

@@ -210,4 +210,84 @@ mod tests {
         );
         root.close().unwrap();
     }
+
+    fn list_file(path: &str, size: u64, sha: &str) -> ListEntry {
+        ListEntry {
+            path: path.to_owned(),
+            is_directory: false,
+            updated_at: "Sat, 13 Feb 2016 03:04:00 -0000".to_owned(),
+            size: Some(size),
+            sha1_hash: Some(sha.to_owned()),
+        }
+    }
+
+    fn list_dir(path: &str) -> ListEntry {
+        ListEntry {
+            path: path.to_owned(),
+            is_directory: true,
+            updated_at: "Sat, 13 Feb 2016 03:04:00 -0000".to_owned(),
+            size: None,
+            sha1_hash: None,
+        }
+    }
+
+    #[test]
+    fn entry_from_list_entry_file() {
+        let le = list_file("a.txt", 42, "deadbeef");
+        let e: Entry = (&le).into();
+        assert_eq!(e.path, "a.txt");
+        assert_eq!(e.local_path, None);
+        let info = e.info.unwrap();
+        assert_eq!(info.size, 42);
+        assert_eq!(info.sha1_sum, "deadbeef");
+    }
+
+    #[test]
+    fn entry_from_list_entry_dir() {
+        let le = list_dir("subdir");
+        let e: Entry = (&le).into();
+        assert_eq!(e.path, "subdir");
+        assert!(e.info.is_none());
+        assert_eq!(e.local_path, None);
+    }
+
+    #[test]
+    fn entry_is_file() {
+        let f: Entry = (&list_file("x", 1, "h")).into();
+        let d: Entry = (&list_dir("d")).into();
+        assert!(f.is_file());
+        assert!(!d.is_file());
+    }
+
+    #[test]
+    fn entry_is_same() {
+        let a: Entry = (&list_file("a", 1, "hash")).into();
+        let b: Entry = (&list_file("a", 1, "hash")).into();
+        let c: Entry = (&list_file("a", 1, "other")).into();
+        let d1: Entry = (&list_dir("d")).into();
+        let d2: Entry = (&list_dir("d")).into();
+        assert!(a.is_same(&b));
+        assert!(!a.is_same(&c));
+        assert!(d1.is_same(&d2)); // dir vs dir: both info==None
+        assert!(!a.is_same(&d1)); // file vs dir
+    }
+
+    #[test]
+    fn remote_tree_sorts_by_path() {
+        let unsorted = vec![
+            list_file("z.txt", 1, "h1"),
+            list_dir("dir"),
+            list_file("a.txt", 2, "h2"),
+            list_file("dir/inside", 3, "h3"),
+        ];
+        let tree = remote_tree(&unsorted);
+        let paths: Vec<_> = tree.iter().map(|e| e.path.as_str()).collect();
+        assert_eq!(paths, vec!["a.txt", "dir", "dir/inside", "z.txt"]);
+    }
+
+    #[test]
+    fn remote_tree_empty() {
+        let tree = remote_tree(&[]);
+        assert!(tree.is_empty());
+    }
 }

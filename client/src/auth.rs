@@ -105,4 +105,62 @@ mod tests {
         assert_eq!(api_key, Auth::ApiKey("api_key".to_string()));
         assert_eq!(api_key.header(), "Bearer api_key");
     }
+
+    #[test]
+    fn debug_masks_password() {
+        let c = Auth::Credentials("alice".into(), "supersecret".into());
+        let s = format!("{:?}", c);
+        assert!(s.contains("alice"));
+        assert!(!s.contains("supersecret"));
+        assert_eq!(s, "Auth::Credentials(\"alice\", \"********\")");
+    }
+
+    #[test]
+    fn debug_masks_api_key() {
+        let k = Auth::ApiKey("c6275ca833ac06c83926ccb00dff4c82".into());
+        let s = format!("{:?}", k);
+        assert!(!s.contains("c6275ca833ac06c83926ccb00dff4c82"));
+        // First 6 chars kept, remaining masked with 26 stars (32 - 6).
+        assert_eq!(s, "Auth::ApiKey(\"c6275c**************************\")");
+    }
+
+    #[test]
+    fn into_string_round_trip() {
+        let c = Auth::Credentials("u".into(), "p".into());
+        assert_eq!(String::from(c.clone()), "u:p");
+        assert_eq!(Auth::from(String::from(c.clone())), c);
+
+        let k = Auth::ApiKey("xyz".into());
+        assert_eq!(String::from(k.clone()), "xyz");
+        assert_eq!(Auth::from(String::from(k.clone())), k);
+    }
+
+    #[test]
+    fn from_str_no_colon_is_api_key() {
+        assert_eq!(Auth::from("plain"), Auth::ApiKey("plain".into()));
+    }
+
+    #[test]
+    fn from_str_password_with_colon() {
+        // Colon in password: only first colon splits.
+        assert_eq!(
+            Auth::from("user:pa:ss"),
+            Auth::Credentials("user".into(), "pa:ss".into())
+        );
+    }
+
+    #[test]
+    fn serde_round_trip() {
+        let c = Auth::Credentials("alice".into(), "secret".into());
+        let json = serde_json::to_string(&c).unwrap();
+        assert_eq!(json, "\"alice:secret\"");
+        let de: Auth = serde_json::from_str(&json).unwrap();
+        assert_eq!(de, c);
+
+        let k = Auth::ApiKey("abc123".into());
+        let json = serde_json::to_string(&k).unwrap();
+        assert_eq!(json, "\"abc123\"");
+        let de: Auth = serde_json::from_str(&json).unwrap();
+        assert_eq!(de, k);
+    }
 }

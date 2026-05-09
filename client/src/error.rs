@@ -73,3 +73,65 @@ pub enum ErrorKind {
 
 /// The result type used by this crate.
 pub type Result<T> = std::result::Result<T, Error>;
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn display_uses_snake_case() {
+        assert_eq!(ErrorKind::SiteNotFound.to_string(), "site_not_found");
+        assert_eq!(ErrorKind::InvalidAuth.to_string(), "invalid_auth");
+        assert_eq!(
+            ErrorKind::CannotDeleteIndex.to_string(),
+            "cannot_delete_index"
+        );
+        assert_eq!(
+            ErrorKind::CannotDeleteSiteDirectory.to_string(),
+            "cannot_delete_site_directory"
+        );
+        assert_eq!(ErrorKind::MissingFiles.to_string(), "missing_files");
+        assert_eq!(ErrorKind::InvalidFileType.to_string(), "invalid_file_type");
+        assert_eq!(ErrorKind::Status.to_string(), "status");
+        assert_eq!(ErrorKind::Unknown.to_string(), "unknown");
+    }
+
+    #[test]
+    fn from_str_round_trip_for_api_kinds() {
+        let kinds = [
+            ErrorKind::SiteNotFound,
+            ErrorKind::InvalidAuth,
+            ErrorKind::CannotDeleteIndex,
+            ErrorKind::CannotDeleteSiteDirectory,
+            ErrorKind::MissingFiles,
+            ErrorKind::InvalidFileType,
+        ];
+        for k in kinds {
+            let s = k.to_string();
+            let parsed: ErrorKind = s.parse().unwrap();
+            assert_eq!(parsed, k);
+        }
+    }
+
+    #[test]
+    fn from_str_ignores_status_and_unknown() {
+        // These are marked #[from_str(ignore)] so they must not parse.
+        assert!("status".parse::<ErrorKind>().is_err());
+        assert!("unknown".parse::<ErrorKind>().is_err());
+    }
+
+    #[test]
+    fn from_str_unknown_string_errors() {
+        assert!("bogus_value_xyz".parse::<ErrorKind>().is_err());
+        assert!("".parse::<ErrorKind>().is_err());
+    }
+
+    #[test]
+    fn api_error_display_format() {
+        let e = Error::Api {
+            message: "boom".to_owned(),
+            kind: ErrorKind::InvalidAuth,
+        };
+        assert_eq!(e.to_string(), "API error: boom (invalid_auth)");
+    }
+}

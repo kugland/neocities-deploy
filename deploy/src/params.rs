@@ -257,4 +257,145 @@ mod tests {
         let saved_config = Config::load(&path).unwrap();
         assert_eq!(config, saved_config);
     }
+
+    fn make_params(verbose: Option<u8>, quiet: Option<u8>) -> Params {
+        Params {
+            config: None,
+            sites: vec![],
+            ignore_errors: false,
+            verbose,
+            quiet,
+            command: Command::List,
+        }
+    }
+
+    #[test]
+    fn verbosity_default_is_info() {
+        assert_eq!(make_params(None, None).verbosity(), log::LevelFilter::Info);
+    }
+
+    #[test]
+    fn verbosity_verbose_increases() {
+        assert_eq!(
+            make_params(Some(1), None).verbosity(),
+            log::LevelFilter::Debug
+        );
+        assert_eq!(
+            make_params(Some(2), None).verbosity(),
+            log::LevelFilter::Trace
+        );
+        assert_eq!(
+            make_params(Some(50), None).verbosity(),
+            log::LevelFilter::Trace
+        );
+    }
+
+    #[test]
+    fn verbosity_quiet_decreases() {
+        assert_eq!(
+            make_params(None, Some(1)).verbosity(),
+            log::LevelFilter::Warn
+        );
+        assert_eq!(
+            make_params(None, Some(2)).verbosity(),
+            log::LevelFilter::Error
+        );
+        assert_eq!(
+            make_params(None, Some(3)).verbosity(),
+            log::LevelFilter::Off
+        );
+        assert_eq!(
+            make_params(None, Some(50)).verbosity(),
+            log::LevelFilter::Off
+        );
+    }
+
+    #[test]
+    fn verbosity_saturates_on_overflow() {
+        // verbose=255 + 3 base saturates to 255, not panic.
+        assert_eq!(
+            make_params(Some(255), None).verbosity(),
+            log::LevelFilter::Trace
+        );
+        // quiet=255 saturates 0 - 252, ends at 0 → Off.
+        assert_eq!(
+            make_params(None, Some(255)).verbosity(),
+            log::LevelFilter::Off
+        );
+    }
+
+    #[test]
+    fn verbosity_verbose_quiet_cancel() {
+        assert_eq!(
+            make_params(Some(2), Some(2)).verbosity(),
+            log::LevelFilter::Info
+        );
+    }
+
+    fn write_config(toml_text: &str) -> tempfile::NamedTempFile {
+        use std::io::Write;
+        let mut f = tempfile::NamedTempFile::new().unwrap();
+        f.write_all(toml_text.as_bytes()).unwrap();
+        f
+    }
+
+    #[test]
+    fn sites_returns_all_when_filter_empty() {
+        let f = write_config(TOML);
+        let params = Params {
+            config: Some(f.path().to_path_buf()),
+            sites: vec![],
+            ignore_errors: false,
+            verbose: None,
+            quiet: None,
+            command: Command::List,
+        };
+        let sites = params.sites().unwrap();
+        let names: Vec<_> = sites.iter().map(|(n, _)| n.as_str()).collect();
+        assert_eq!(names, vec!["lorem.com", "ipsum.com"]);
+    }
+
+    #[test]
+    fn sites_filters_to_requested() {
+        let f = write_config(TOML);
+        let params = Params {
+            config: Some(f.path().to_path_buf()),
+            sites: vec!["ipsum.com".to_owned()],
+            ignore_errors: false,
+            verbose: None,
+            quiet: None,
+            command: Command::List,
+        };
+        let sites = params.sites().unwrap();
+        assert_eq!(sites.len(), 1);
+        assert_eq!(sites[0].0, "ipsum.com");
+    }
+
+    #[test]
+    fn sites_unknown_name_errors() {
+        let f = write_config(TOML);
+        let params = Params {
+            config: Some(f.path().to_path_buf()),
+            sites: vec!["nope.com".to_owned()],
+            ignore_errors: false,
+            verbose: None,
+            quiet: None,
+            command: Command::List,
+        };
+        let err = params.sites().unwrap_err();
+        assert!(err.to_string().contains("Site not found: nope.com"));
+    }
+
+    #[test]
+    fn sites_missing_config_returns_empty() {
+        let params = Params {
+            config: Some(PathBuf::from("/nonexistent/config/xyz.toml")),
+            sites: vec![],
+            ignore_errors: false,
+            verbose: None,
+            quiet: None,
+            command: Command::List,
+        };
+        assert!(params.sites().unwrap().is_empty());
+    }
 }

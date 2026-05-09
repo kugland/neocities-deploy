@@ -107,3 +107,52 @@ fn test_key_error() {
 
     assert_eq!(my_toml["site"]["lorem.com"]["auth"], "username:password");
 }
+
+#[test]
+#[serial]
+fn test_key_ignore_errors() {
+    let mut server = Server::new();
+
+    let mock = server
+        .mock("GET", "/key")
+        .with_status(200)
+        .with_header("Content-Type", "application/json")
+        .with_body(indoc! {r#"{
+            "result": "error",
+            "error_type": "invalid_auth",
+            "message": "bad credentials"
+        }"#})
+        .create();
+
+    env::set_var("NEOCITIES_DEPLOY_API_URL", server.url());
+
+    #[allow(deprecated)]
+    let mut cmd = Command::cargo_bin(env!("CARGO_PKG_NAME")).unwrap();
+    let config = common::config_file("username:password", "/path/to/lorem");
+
+    cmd.arg("--ignore-errors")
+        .arg("key")
+        .arg("--config")
+        .arg(config.path());
+    cmd.assert().success();
+
+    mock.assert();
+
+    // Auth should be unchanged because the error path skipped the rewrite.
+    let my_toml: HashMap<String, HashMap<String, HashMap<String, String>>> =
+        toml::from_str(&std::fs::read_to_string(config.path()).unwrap()).unwrap();
+    assert_eq!(my_toml["site"]["lorem.com"]["auth"], "username:password");
+}
+
+#[test]
+#[serial]
+fn test_key_no_credentials_to_convert() {
+    // Site already has an API key — nothing to do.
+    let mut cmd = Command::cargo_bin(env!("CARGO_PKG_NAME")).unwrap();
+    let config = common::config_file("alreadyanapikey", "/path/to/lorem");
+
+    cmd.arg("key").arg("--config").arg(config.path());
+    cmd.assert()
+        .success()
+        .stderr(contains("No sites to get API keys for."));
+}

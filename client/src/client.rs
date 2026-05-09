@@ -602,4 +602,188 @@ mod tests {
             .unwrap();
         mock.assert();
     }
+
+    #[test]
+    fn upload_err_invalid_file_type() {
+        let mut server = Server::new();
+        let mock = server
+            .mock("POST", "/upload")
+            .with_status(200)
+            .with_header("Content-Type", "application/json")
+            .with_body(
+                r#"{
+                    "result": "error",
+                    "error_type": "invalid_file_type",
+                    "message": "evil.exe is not a supported file type"
+                }"#,
+            )
+            .create();
+        let client = Client::builder()
+            .base_url(server.url())
+            .auth(Auth::from("username:password"))
+            .build()
+            .unwrap();
+        let err = client.upload(&[("evil.exe", b"x")]).unwrap_err();
+        mock.assert();
+        assert!(matches!(
+            err,
+            Error::Api {
+                kind: ErrorKind::InvalidFileType,
+                ..
+            }
+        ));
+    }
+
+    #[test]
+    fn delete_cannot_delete_index() {
+        let mut server = Server::new();
+        let mock = server
+            .mock("POST", "/delete")
+            .with_status(200)
+            .with_header("Content-Type", "application/json")
+            .with_body(
+                r#"{
+                    "result": "error",
+                    "error_type": "cannot_delete_index",
+                    "message": "you cannot delete index.html"
+                }"#,
+            )
+            .create();
+        let client = Client::builder()
+            .base_url(server.url())
+            .auth(Auth::from("username:password"))
+            .build()
+            .unwrap();
+        let err = client.delete(&["index.html"]).unwrap_err();
+        mock.assert();
+        assert!(matches!(
+            err,
+            Error::Api {
+                kind: ErrorKind::CannotDeleteIndex,
+                ..
+            }
+        ));
+    }
+
+    #[test]
+    fn delete_cannot_delete_site_directory() {
+        let mut server = Server::new();
+        let mock = server
+            .mock("POST", "/delete")
+            .with_status(200)
+            .with_header("Content-Type", "application/json")
+            .with_body(
+                r#"{
+                    "result": "error",
+                    "error_type": "cannot_delete_site_directory",
+                    "message": "you cannot delete the root site directory"
+                }"#,
+            )
+            .create();
+        let client = Client::builder()
+            .base_url(server.url())
+            .auth(Auth::from("username:password"))
+            .build()
+            .unwrap();
+        let err = client.delete(&["/"]).unwrap_err();
+        mock.assert();
+        assert!(matches!(
+            err,
+            Error::Api {
+                kind: ErrorKind::CannotDeleteSiteDirectory,
+                ..
+            }
+        ));
+    }
+
+    #[test]
+    fn list_5xx_non_json_returns_status_kind() {
+        let mut server = Server::new();
+        let mock = server
+            .mock("GET", "/list")
+            .with_status(503)
+            .with_body("<html>Service Unavailable</html>")
+            .create();
+        let client = Client::builder()
+            .base_url(server.url())
+            .auth(Auth::from("username:password"))
+            .build()
+            .unwrap();
+        let err = client.list().unwrap_err();
+        mock.assert();
+        let Error::Api { kind, message } = err else {
+            panic!("expected Error::Api, got {:?}", err);
+        };
+        assert_eq!(kind, ErrorKind::Status);
+        assert!(message.starts_with("503 "));
+    }
+
+    #[test]
+    fn key_unknown_error_type_maps_to_unknown() {
+        let mut server = Server::new();
+        let mock = server
+            .mock("GET", "/key")
+            .with_status(200)
+            .with_header("Content-Type", "application/json")
+            .with_body(
+                r#"{
+                    "result": "error",
+                    "error_type": "completely_made_up",
+                    "message": "we have never seen this before"
+                }"#,
+            )
+            .create();
+        let client = Client::builder()
+            .base_url(server.url())
+            .auth(Auth::from("username:password"))
+            .build()
+            .unwrap();
+        let err = client.key().unwrap_err();
+        mock.assert();
+        assert!(matches!(
+            err,
+            Error::Api {
+                kind: ErrorKind::Unknown,
+                ..
+            }
+        ));
+    }
+
+    #[test]
+    fn has_allowed_extension_paid_account_always_true() {
+        assert!(Client::has_allowed_extension(false, "anything.exe"));
+        assert!(Client::has_allowed_extension(false, "no_extension"));
+        assert!(Client::has_allowed_extension(false, "foo.weird"));
+    }
+
+    #[test]
+    fn has_allowed_extension_free_account_basic() {
+        assert!(Client::has_allowed_extension(true, "index.html"));
+        assert!(Client::has_allowed_extension(true, "style.css"));
+        assert!(!Client::has_allowed_extension(true, "evil.exe"));
+        assert!(!Client::has_allowed_extension(true, "noext"));
+    }
+
+    #[test]
+    fn has_allowed_extension_case_insensitive() {
+        assert!(Client::has_allowed_extension(true, "PHOTO.JPG"));
+        assert!(Client::has_allowed_extension(true, "Page.HTML"));
+        assert!(Client::has_allowed_extension(true, "MiXeD.PnG"));
+    }
+
+    #[test]
+    fn has_allowed_extension_nested_paths() {
+        assert!(Client::has_allowed_extension(true, "sub/dir/cat.png"));
+        assert!(!Client::has_allowed_extension(true, "sub/dir/run.sh"));
+        assert!(Client::has_allowed_extension(
+            true,
+            "deep/nested/sub/dir/page.html"
+        ));
+    }
+
+    #[test]
+    fn has_allowed_extension_dotfile_no_extension() {
+        // ".gitignore" has no actual extension by typed_path semantics — should reject for free.
+        assert!(!Client::has_allowed_extension(true, ".gitignore"));
+    }
 }

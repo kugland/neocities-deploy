@@ -223,4 +223,58 @@ mod tests {
         assert_eq!(kind, ErrorKind::Status);
         assert_eq!(message, "401 Unauthorized");
     }
+
+    #[test]
+    fn parse_missing_result_field() {
+        // No "result" field at all → JSON deserialization of OuterResponse fails.
+        let res = make_response(200, r#"{ "foobar": "baz" }"#);
+        let err = parse_response::<String>("foobar", res).unwrap_err();
+        assert!(matches!(err, Error::Json { .. }));
+    }
+
+    #[test]
+    fn parse_missing_inner_field() {
+        // result=success but the requested field is absent.
+        let res = make_response(200, r#"{ "result": "success", "other_field": "hello" }"#);
+        let err = parse_response::<String>("foobar", res).unwrap_err();
+        assert!(matches!(err, Error::Json { .. }));
+    }
+
+    #[test]
+    fn parse_error_with_missing_error_type_and_message() {
+        // result=error but neither error_type nor message present → kind=Unknown, default msg.
+        let res = make_response(200, r#"{ "result": "error" }"#);
+        let err = parse_response::<String>("foobar", res).unwrap_err();
+        let Error::Api { message, kind } = err else {
+            panic!("Expected Error::Api, got {:?}", err);
+        };
+        assert_eq!(kind, ErrorKind::Unknown);
+        assert_eq!(message, "No error message provided");
+    }
+
+    #[test]
+    fn parse_error_with_unknown_error_type() {
+        // Unknown error_type string → falls back to ErrorKind::Unknown.
+        let res = make_response(
+            200,
+            r#"{ "result": "error", "error_type": "made_up", "message": "hi" }"#,
+        );
+        let err = parse_response::<String>("foobar", res).unwrap_err();
+        let Error::Api { message, kind } = err else {
+            panic!("Expected Error::Api, got {:?}", err);
+        };
+        assert_eq!(kind, ErrorKind::Unknown);
+        assert_eq!(message, "hi");
+    }
+
+    #[test]
+    fn parse_5xx_with_invalid_json() {
+        let res = make_response(500, "<html>boom</html>");
+        let err = parse_response::<String>("foobar", res).unwrap_err();
+        let Error::Api { kind, message } = err else {
+            panic!("Expected Error::Api, got {:?}", err);
+        };
+        assert_eq!(kind, ErrorKind::Status);
+        assert_eq!(message, "500 Internal Server Error");
+    }
 }

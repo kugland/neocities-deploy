@@ -169,3 +169,58 @@ fn path_validator(s: &str) -> Validation {
         Validation::Valid
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::fs;
+
+    fn is_valid(v: &Validation) -> bool {
+        matches!(v, Validation::Valid)
+    }
+
+    #[test]
+    fn non_empty_validator_works() {
+        assert!(!is_valid(&non_empty_validator("")));
+        assert!(is_valid(&non_empty_validator("x")));
+        assert!(is_valid(&non_empty_validator(" ")));
+    }
+
+    #[test]
+    fn proxy_validator_empty_is_valid() {
+        assert!(is_valid(&proxy_validator("")));
+    }
+
+    #[test]
+    fn proxy_validator_accepts_url() {
+        assert!(is_valid(&proxy_validator("http://localhost:8080")));
+        assert!(is_valid(&proxy_validator("https://proxy.example.com:8080")));
+    }
+
+    #[test]
+    fn proxy_validator_rejects_garbage() {
+        assert!(!is_valid(&proxy_validator("not a url")));
+        assert!(!is_valid(&proxy_validator("just-a-host")));
+    }
+
+    #[test]
+    fn path_validator_accepts_dir() {
+        let tmp = tempfile::tempdir().unwrap();
+        assert!(is_valid(&path_validator(tmp.path().to_str().unwrap())));
+    }
+
+    #[test]
+    fn path_validator_rejects_missing() {
+        assert!(!is_valid(&path_validator(
+            "/this/path/should/not/exist/xyz/123"
+        )));
+    }
+
+    #[test]
+    fn path_validator_rejects_file() {
+        let tmp = tempfile::tempdir().unwrap();
+        let f = tmp.path().join("a_file");
+        fs::write(&f, b"hi").unwrap();
+        assert!(!is_valid(&path_validator(f.to_str().unwrap())));
+    }
+}
