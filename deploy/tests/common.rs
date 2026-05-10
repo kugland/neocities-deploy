@@ -32,11 +32,10 @@ pub fn config_file(auth: &str, path: impl AsRef<Path>) -> NamedTempFile {
 pub fn config_file_multi(sites: &[(&str, &str, &Path)]) -> NamedTempFile {
     let mut text = String::new();
     for (name, auth, path) in sites {
+        let path_str = path.to_str().unwrap().replace('\\', "/");
         text.push_str(&format!(
             "[site.\"{}\"]\nauth = \"{}\"\npath = \"{}\"\n\n",
-            name,
-            auth,
-            path.to_str().unwrap()
+            name, auth, path_str
         ));
     }
     let mut file = NamedTempFile::new().unwrap();
