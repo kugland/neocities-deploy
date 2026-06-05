@@ -33,5 +33,5 @@ assert_cmd = "2.1.2"
 indoc.workspace = true
 mockito.workspace = true
 predicates = "3.1.0"
-serial_test = "3.0.0"
+serial_test = "3.5.0"
 tempfile = "3.10.1"
