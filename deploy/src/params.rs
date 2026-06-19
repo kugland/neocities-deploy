@@ -160,11 +160,11 @@ impl Config {
         let path = path.into();
         log::debug!("Saving configuration to {:?}", path);
         log::trace!("{:#?}", self);
-        if let Some(parent) = path.parent() {
-            if !parent.exists() {
-                log::debug!("Creating parent directories for {:?}", path);
-                fs::create_dir_all(parent)?;
-            }
+        if let Some(parent) = path.parent()
+            && !parent.exists()
+        {
+            log::debug!("Creating parent directories for {:?}", path);
+            fs::create_dir_all(parent)?;
         }
         fs::write(&path, toml::to_string_pretty(self)?)?;
         log::info!("Configuration saved to {:?}", path);
