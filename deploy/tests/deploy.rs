@@ -101,7 +101,9 @@ fn test_deploy_uploads_and_deletes() {
         .expect(1)
         .create();
 
-    env::set_var("NEOCITIES_DEPLOY_API_URL", server.url());
+    unsafe {
+        env::set_var("NEOCITIES_DEPLOY_API_URL", server.url());
+    }
 
     let config = common::config_file("apikeyvalue", local.path());
 
@@ -145,7 +147,9 @@ fn test_deploy_no_changes_no_writes() {
         .create();
     // No upload/delete mocks: any call would 501 from mockito, failing the run.
 
-    env::set_var("NEOCITIES_DEPLOY_API_URL", server.url());
+    unsafe {
+        env::set_var("NEOCITIES_DEPLOY_API_URL", server.url());
+    }
     let config = common::config_file("apikeyvalue", local.path());
 
     #[allow(deprecated)]

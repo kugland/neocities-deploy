@@ -19,9 +19,9 @@
 //! This module contains the types used to deserialize the JSON responses from the Neocities API.
 
 use crate::{Error, ErrorKind, Result};
-use serde::{de::Error as SerdeError, Deserialize};
+use serde::{Deserialize, de::Error as SerdeError};
 use serde_json::Value;
-use ureq::{http::Response, Body};
+use ureq::{Body, http::Response};
 
 /// Type for the response of the `/api/info` endpoint.
 ///

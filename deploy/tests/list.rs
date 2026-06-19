@@ -65,7 +65,9 @@ fn test_list() {
         }"#})
         .create();
 
-    env::set_var("NEOCITIES_DEPLOY_API_URL", server.url());
+    unsafe {
+        env::set_var("NEOCITIES_DEPLOY_API_URL", server.url());
+    }
 
     #[allow(deprecated)]
     let mut cmd = Command::cargo_bin(env!("CARGO_PKG_NAME")).unwrap();
@@ -98,7 +100,9 @@ fn test_list_api_error_propagates() {
         }"#})
         .create();
 
-    env::set_var("NEOCITIES_DEPLOY_API_URL", server.url());
+    unsafe {
+        env::set_var("NEOCITIES_DEPLOY_API_URL", server.url());
+    }
 
     #[allow(deprecated)]
     let mut cmd = Command::cargo_bin(env!("CARGO_PKG_NAME")).unwrap();
@@ -125,7 +129,9 @@ fn test_list_ignore_errors_succeeds() {
         }"#})
         .create();
 
-    env::set_var("NEOCITIES_DEPLOY_API_URL", server.url());
+    unsafe {
+        env::set_var("NEOCITIES_DEPLOY_API_URL", server.url());
+    }
 
     #[allow(deprecated)]
     let mut cmd = Command::cargo_bin(env!("CARGO_PKG_NAME")).unwrap();
@@ -161,7 +167,9 @@ fn test_list_multi_site() {
         .expect(2)
         .create();
 
-    env::set_var("NEOCITIES_DEPLOY_API_URL", server.url());
+    unsafe {
+        env::set_var("NEOCITIES_DEPLOY_API_URL", server.url());
+    }
 
     #[allow(deprecated)]
     let mut cmd = Command::cargo_bin(env!("CARGO_PKG_NAME")).unwrap();

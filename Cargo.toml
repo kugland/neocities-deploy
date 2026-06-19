@@ -11,9 +11,9 @@ description = "A command-line tool for deploying your Neocities site and a libra
 homepage = "https://github.com/kugland/neocities-deploy"
 repository = "https://github.com/kugland/neocities-deploy"
 version = "0.1.24"
-edition = "2021"
+edition = "2024"
 license = "GPL-3.0"
-rust-version = "1.82.0"
+rust-version = "1.88.0"
 
 [workspace.dependencies]
 indoc = "2.0.5"

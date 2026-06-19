@@ -18,13 +18,13 @@
 
 //! The params module unifies command-line arguments and configuration file handling.
 
-use anyhow::{anyhow, Result};
+use anyhow::{Result, anyhow};
 use clap::{ArgAction::Count, Parser};
 use directories::ProjectDirs;
 use indexmap::IndexMap;
 use neocities_client::{
-    ureq::{Agent, Proxy},
     Auth, Client,
+    ureq::{Agent, Proxy},
 };
 use serde::{Deserialize, Serialize};
 use std::{env, fs, path::PathBuf};

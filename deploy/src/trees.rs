@@ -16,11 +16,11 @@
 ////////       You should have received a copy of the GNU General Public License           ////////
 ////////       along with this program. If not, see https://www.gnu.org/licenses/.         ////////
 
-use anyhow::{anyhow, Result};
+use anyhow::{Result, anyhow};
 use itertools::Itertools;
-use neocities_client::{response::ListEntry, Client};
+use neocities_client::{Client, response::ListEntry};
 use sha1::{Digest, Sha1};
-use std::path::{Path, PathBuf, MAIN_SEPARATOR};
+use std::path::{MAIN_SEPARATOR, Path, PathBuf};
 use std::{fs, io};
 
 const NEOCITIES_IGNORE: &str = ".neocitiesignore";

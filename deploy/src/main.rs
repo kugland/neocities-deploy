@@ -27,7 +27,10 @@ use std::env;
 
 fn main() -> Result<()> {
     if env::var("RUST_LOG").is_err() {
-        env::set_var("RUST_LOG", "neocities_deploy");
+        // SAFETY: called at the start of `main` before any other threads are spawned.
+        unsafe {
+            env::set_var("RUST_LOG", "neocities_deploy");
+        }
     }
     pretty_env_logger::try_init()?;
 

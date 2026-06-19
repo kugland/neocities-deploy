@@ -19,8 +19,8 @@
 use crate::params::{Config, Params, Site};
 use anyhow::Result;
 use inquire::validator::{ErrorMessage, Validation};
-use neocities_client::ureq;
 use neocities_client::Auth;
+use neocities_client::ureq;
 use std::path::{Path, PathBuf};
 use url::Url;
 

@@ -18,7 +18,7 @@
 
 //! Client for the Neocities API.
 
-use crate::response::{parse_response, Info, ListEntry};
+use crate::response::{Info, ListEntry, parse_response};
 use crate::{Auth, Error, Result};
 use derive_builder::Builder;
 use form_data_builder::FormData;
