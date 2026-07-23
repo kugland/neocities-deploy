@@ -11,7 +11,7 @@ rust-version.workspace = true
 version.workspace = true
 
 [dependencies]
-base64 = "0.22.0"
+base64 = "0.23.0"
 derive_builder = "0.20.0"
 form-data-builder = "1.0.1"
 indoc.workspace = true
