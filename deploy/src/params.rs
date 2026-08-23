@@ -263,6 +263,65 @@ mod tests {
         assert_eq!(config, saved_config);
     }
 
+    fn make_site(proxy: Option<&str>) -> Site {
+        Site {
+            auth: Auth::from("user:pass"),
+            free_account: None,
+            path: "/path/to/site".to_owned(),
+            proxy: proxy.map(str::to_owned),
+        }
+    }
+
+    #[test]
+    fn build_client_without_proxy_succeeds() {
+        assert!(make_site(None).build_client().is_ok());
+    }
+
+    #[test]
+    fn build_client_with_valid_proxy_succeeds() {
+        assert!(make_site(Some("http://localhost:8080")).build_client().is_ok());
+    }
+
+    #[test]
+    fn build_client_with_invalid_proxy_errors() {
+        assert!(make_site(Some("not a valid proxy")).build_client().is_err());
+    }
+
+    #[test]
+    fn has_site_true_when_present() {
+        let config: Config = toml::from_str(TOML).unwrap();
+        assert!(config.has_site("lorem.com"));
+    }
+
+    #[test]
+    fn has_site_false_when_absent() {
+        let config: Config = toml::from_str(TOML).unwrap();
+        assert!(!config.has_site("nope.com"));
+    }
+
+    #[test]
+    fn insert_site_adds_new_site() {
+        let mut config = Config::default();
+        assert!(!config.has_site("new.com"));
+        config.insert_site("new.com".to_owned(), make_site(None));
+        assert!(config.has_site("new.com"));
+        assert_eq!(config.sites.get("new.com").unwrap().path, "/path/to/site");
+    }
+
+    #[test]
+    fn insert_site_replaces_existing_site() {
+        let mut config: Config = toml::from_str(TOML).unwrap();
+        config.insert_site("lorem.com".to_owned(), make_site(None));
+        assert_eq!(config.sites.get("lorem.com").unwrap().path, "/path/to/site");
+    }
+
+    #[test]
+    fn default_config_file_ends_with_config_toml() {
+        let path = Config::default_config_file();
+        assert_eq!(path.file_name().unwrap(), "config.toml");
+        assert!(path.is_absolute());
+    }
+
     fn make_params(verbose: Option<u8>, quiet: Option<u8>) -> Params {
         Params {
             config: None,
