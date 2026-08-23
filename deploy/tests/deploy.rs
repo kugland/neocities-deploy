@@ -161,6 +161,69 @@ fn test_deploy_no_changes_no_writes() {
 
 #[test]
 #[serial]
+fn test_deploy_ignore_errors_continues_to_next_site_after_list_failure() {
+    // Two sites: "broken.com" whose /list call fails, and "ok.com" whose /list
+    // succeeds. With --ignore-errors, the failure on broken.com must not abort the
+    // whole run — ok.com should still get deployed.
+    let broken_dir = tempfile::tempdir().unwrap();
+    fs::write(broken_dir.path().join("whatever.txt"), b"content\n").unwrap();
+
+    let ok_dir = tempfile::tempdir().unwrap();
+    let ok_content = b"brand new file\n";
+    fs::write(ok_dir.path().join("new.txt"), ok_content).unwrap();
+
+    let mut server = Server::new();
+
+    let broken_list_mock = server
+        .mock("GET", "/list")
+        .match_header("Authorization", "Basic YnJva2VuOnBhc3N3b3Jk") // broken:password
+        .with_status(200)
+        .with_header("Content-Type", "application/json")
+        .with_body(r#"{"result":"error","error_type":"invalid_auth","message":"bad creds"}"#)
+        .create();
+
+    let ok_list_mock = server
+        .mock("GET", "/list")
+        .match_header("Authorization", "Basic b2s6cGFzc3dvcmQ=") // ok:password
+        .with_status(200)
+        .with_header("Content-Type", "application/json")
+        .with_body(r#"{"result":"success","files":[]}"#)
+        .create();
+
+    let ok_upload_mock = server
+        .mock("POST", "/upload")
+        .match_header("Authorization", "Basic b2s6cGFzc3dvcmQ=") // ok:password
+        .match_body(Matcher::Regex("brand new file".to_owned()))
+        .with_status(200)
+        .with_header("Content-Type", "application/json")
+        .with_body(r#"{"result":"success","message":"uploaded"}"#)
+        .expect(1)
+        .create();
+
+    unsafe {
+        env::set_var("NEOCITIES_DEPLOY_API_URL", server.url());
+    }
+
+    let config = common::config_file_multi(&[
+        ("broken.com", "broken:password", broken_dir.path()),
+        ("ok.com", "ok:password", ok_dir.path()),
+    ]);
+
+    #[allow(deprecated)]
+    let mut cmd = Command::cargo_bin(env!("CARGO_PKG_NAME")).unwrap();
+    cmd.arg("--ignore-errors")
+        .arg("deploy")
+        .arg("--config")
+        .arg(config.path());
+    cmd.assert().success();
+
+    broken_list_mock.assert();
+    ok_list_mock.assert();
+    ok_upload_mock.assert();
+}
+
+#[test]
+#[serial]
 fn test_deploy_no_sites() {
     // Empty config (file exists but no sites): should print and succeed.
     let f = tempfile::NamedTempFile::new().unwrap();

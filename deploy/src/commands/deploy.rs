@@ -17,7 +17,10 @@
 ////////       along with this program. If not, see https://www.gnu.org/licenses/.         ////////
 
 use crate::trees::Entry;
-use crate::{params::Params, trees};
+use crate::{
+    params::{Params, Site},
+    trees,
+};
 use anyhow::Result;
 use itertools::{EitherOrBoth::*, Itertools};
 use neocities_client::Client;
@@ -32,24 +35,37 @@ pub fn deploy(params: &Params) -> Result<()> {
         return Ok(());
     }
     for (name, site) in sites {
-        log::info!("Deploying site: {}", name);
-        let free_account = site.free_account.unwrap_or_default();
-        let local = trees::local_tree(&site.path, free_account)?;
-        let client = site.build_client()?;
-        let list = client.list()?;
-        let remote = trees::remote_tree(&list)?;
-        for action in Action::make_strategy(local, remote) {
-            action.apply(&client).or_else(|e| {
-                if params.ignore_errors {
-                    log::error!("{}", e);
-                    Ok(())
-                } else {
-                    Err(e)
-                }
-            })?;
-        }
+        deploy_site(params, &name, &site).or_else(|e| {
+            if params.ignore_errors {
+                log::error!("{}", e);
+                Ok(())
+            } else {
+                Err(e)
+            }
+        })?;
     }
     log::info!("Deployment complete");
+    Ok(())
+}
+
+/// Deploy a single site, stopping at its first error.
+fn deploy_site(params: &Params, name: &str, site: &Site) -> Result<()> {
+    log::info!("Deploying site: {}", name);
+    let free_account = site.free_account.unwrap_or_default();
+    let local = trees::local_tree(&site.path, free_account)?;
+    let client = site.build_client()?;
+    let list = client.list()?;
+    let remote = trees::remote_tree(&list)?;
+    for action in Action::make_strategy(local, remote) {
+        action.apply(&client).or_else(|e| {
+            if params.ignore_errors {
+                log::error!("{}", e);
+                Ok(())
+            } else {
+                Err(e)
+            }
+        })?;
+    }
     Ok(())
 }
 
