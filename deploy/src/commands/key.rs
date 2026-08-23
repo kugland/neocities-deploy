@@ -34,9 +34,6 @@ pub fn key(params: &Params) -> Result<()> {
 
     let mut config = params.config()?;
     for (name, site) in sites {
-        if matches!(site.auth, Auth::ApiKey(_)) {
-            continue;
-        }
         println!("Getting API key for site {}", name);
         let client = site.build_client()?;
         let key = match client.key() {
