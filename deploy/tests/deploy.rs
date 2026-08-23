@@ -224,6 +224,91 @@ fn test_deploy_ignore_errors_continues_to_next_site_after_list_failure() {
 
 #[test]
 #[serial]
+fn test_deploy_ignore_errors_continues_after_action_failure() {
+    // A single site whose upload action fails. With --ignore-errors, the failed
+    // action must be logged and skipped instead of aborting the deploy.
+    let local = tempfile::tempdir().unwrap();
+    fs::write(local.path().join("new.txt"), b"brand new file\n").unwrap();
+
+    let mut server = Server::new();
+
+    let list_mock = server
+        .mock("GET", "/list")
+        .with_status(200)
+        .with_header("Content-Type", "application/json")
+        .with_body(r#"{"result":"success","files":[]}"#)
+        .create();
+
+    let upload_mock = server
+        .mock("POST", "/upload")
+        .with_status(200)
+        .with_header("Content-Type", "application/json")
+        .with_body(r#"{"result":"error","error_type":"invalid_file_type","message":"bad file"}"#)
+        .create();
+
+    unsafe {
+        env::set_var("NEOCITIES_DEPLOY_API_URL", server.url());
+    }
+
+    let config = common::config_file("apikeyvalue", local.path());
+
+    #[allow(deprecated)]
+    let mut cmd = Command::cargo_bin(env!("CARGO_PKG_NAME")).unwrap();
+    cmd.arg("--ignore-errors")
+        .arg("deploy")
+        .arg("--config")
+        .arg(config.path());
+    cmd.assert().success();
+
+    list_mock.assert();
+    upload_mock.assert();
+}
+
+#[test]
+#[serial]
+fn test_deploy_without_ignore_errors_aborts_on_action_failure() {
+    // Same setup as above, but without --ignore-errors: the failed upload must
+    // abort the deploy with a non-zero exit code.
+    let local = tempfile::tempdir().unwrap();
+    fs::write(local.path().join("new.txt"), b"brand new file\n").unwrap();
+
+    let mut server = Server::new();
+
+    let list_mock = server
+        .mock("GET", "/list")
+        .with_status(200)
+        .with_header("Content-Type", "application/json")
+        .with_body(r#"{"result":"success","files":[]}"#)
+        .create();
+
+    let upload_mock = server
+        .mock("POST", "/upload")
+        .with_status(200)
+        .with_header("Content-Type", "application/json")
+        .with_body(r#"{"result":"error","error_type":"invalid_file_type","message":"bad file"}"#)
+        .create();
+
+    unsafe {
+        env::set_var("NEOCITIES_DEPLOY_API_URL", server.url());
+    }
+
+    let config = common::config_file("apikeyvalue", local.path());
+
+    #[allow(deprecated)]
+    let mut cmd = Command::cargo_bin(env!("CARGO_PKG_NAME")).unwrap();
+    cmd.arg("deploy").arg("--config").arg(config.path());
+    cmd.assert()
+        .failure()
+        .stderr(predicates::str::contains(
+            "API error: bad file (invalid_file_type)",
+        ));
+
+    list_mock.assert();
+    upload_mock.assert();
+}
+
+#[test]
+#[serial]
 fn test_deploy_no_sites() {
     // Empty config (file exists but no sites): should print and succeed.
     let f = tempfile::NamedTempFile::new().unwrap();
