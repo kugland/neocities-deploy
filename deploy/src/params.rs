@@ -27,7 +27,7 @@ use neocities_client::{
     ureq::{Agent, Proxy},
 };
 use serde::{Deserialize, Serialize};
-use std::{env, fs, path::PathBuf};
+use std::{fs, path::PathBuf};
 
 #[derive(Debug, Parser)]
 #[command(version, about, author, long_about = None)]
@@ -205,7 +205,12 @@ impl Site {
         };
         let client = {
             let mut client_builder = Client::builder();
-            if let Ok(mockito_address) = env::var("NEOCITIES_DEPLOY_API_URL") {
+            // Only debug builds honor this override, so a release binary can never have its
+            // requests (and credentials) silently redirected by an ambient env var. Debug builds
+            // are what `cargo test` runs, which is the only place this is used, to point the
+            // client at a mock server.
+            #[cfg(debug_assertions)]
+            if let Ok(mockito_address) = std::env::var("NEOCITIES_DEPLOY_API_URL") {
                 client_builder.base_url(mockito_address);
             }
             client_builder.ureq_agent(agent).auth(auth).build()?
