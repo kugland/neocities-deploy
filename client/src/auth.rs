@@ -80,10 +80,14 @@ impl Debug for Auth {
                 .field(username)
                 .field(&"********")
                 .finish(),
-            Self::ApiKey(key) => f
-                .debug_tuple("Auth::ApiKey")
-                .field(&format!("{}{}", &key[0..6], "*".repeat(32 - 6)))
-                .finish(),
+            Self::ApiKey(key) => {
+                let visible_chars = key.chars().count().min(6);
+                let visible: String = key.chars().take(visible_chars).collect();
+                let masked = "*".repeat(key.chars().count() - visible_chars);
+                f.debug_tuple("Auth::ApiKey")
+                    .field(&format!("{}{}", visible, masked))
+                    .finish()
+            }
         }
     }
 }
@@ -122,6 +126,21 @@ mod tests {
         assert!(!s.contains("c6275ca833ac06c83926ccb00dff4c82"));
         // First 6 chars kept, remaining masked with 26 stars (32 - 6).
         assert_eq!(s, "Auth::ApiKey(\"c6275c**************************\")");
+    }
+
+    #[test]
+    fn debug_masks_api_key_shorter_than_six_chars() {
+        // Must not panic (used to slice `key[0..6]` unconditionally).
+        let k = Auth::ApiKey("ab".into());
+        let s = format!("{:?}", k);
+        assert_eq!(s, "Auth::ApiKey(\"ab\")");
+    }
+
+    #[test]
+    fn debug_masks_api_key_empty() {
+        let k = Auth::ApiKey("".into());
+        let s = format!("{:?}", k);
+        assert_eq!(s, "Auth::ApiKey(\"\")");
     }
 
     #[test]
