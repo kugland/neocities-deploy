@@ -37,7 +37,7 @@ pub fn deploy(params: &Params) -> Result<()> {
         let local = trees::local_tree(&site.path, free_account)?;
         let client = site.build_client()?;
         let list = client.list()?;
-        let remote = trees::remote_tree(&list);
+        let remote = trees::remote_tree(&list)?;
         for action in Action::make_strategy(local, remote) {
             action.apply(&client).or_else(|e| {
                 if params.ignore_errors {

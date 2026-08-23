@@ -92,28 +92,41 @@ impl Entry {
 }
 
 // Conversion of API’s `ListEntry` to `Entry`.
-impl From<&ListEntry> for Entry {
-    fn from(entry: &ListEntry) -> Self {
-        Self {
+//
+// This is fallible rather than an `expect`-ing `From` impl: `size`/`sha1_hash` come straight off
+// the network, and the API's own contract only promises they're present for non-directory
+// entries (see `ListEntry`'s docs), so a malformed or unexpected response must surface as an
+// error instead of panicking the whole process.
+impl TryFrom<&ListEntry> for Entry {
+    type Error = anyhow::Error;
+
+    fn try_from(entry: &ListEntry) -> Result<Self> {
+        let info = if entry.is_directory {
+            None
+        } else {
+            Some(FileInfo {
+                size: entry
+                    .size
+                    .ok_or_else(|| anyhow!("Remote file {:?} has no size", entry.path))?,
+                sha1_sum: entry
+                    .sha1_hash
+                    .clone()
+                    .ok_or_else(|| anyhow!("Remote file {:?} has no SHA-1 hash", entry.path))?,
+            })
+        };
+        Ok(Self {
             path: entry.path.clone(),
-            info: if entry.is_directory {
-                None
-            } else {
-                Some(FileInfo {
-                    size: entry.size.expect("Entry has no size"),
-                    sha1_sum: (entry.sha1_hash.clone()).expect("Entry has no SHA-1 hash"),
-                })
-            },
+            info,
             local_path: None,
-        }
+        })
     }
 }
 
 /// Create a tree from a list of [`ListEntry`] from the API.
-pub fn remote_tree(list: &[ListEntry]) -> Vec<Entry> {
-    let mut res: Vec<_> = list.iter().map(Entry::from).collect();
+pub fn remote_tree(list: &[ListEntry]) -> Result<Vec<Entry>> {
+    let mut res: Vec<_> = list.iter().map(Entry::try_from).try_collect()?;
     res.sort_by(|a, b| a.path.cmp(&b.path));
-    res
+    Ok(res)
 }
 
 /// Create a local file tree from a path.
@@ -234,7 +247,7 @@ mod tests {
     #[test]
     fn entry_from_list_entry_file() {
         let le = list_file("a.txt", 42, "deadbeef");
-        let e: Entry = (&le).into();
+        let e = Entry::try_from(&le).unwrap();
         assert_eq!(e.path, "a.txt");
         assert_eq!(e.local_path, None);
         let info = e.info.unwrap();
@@ -245,27 +258,41 @@ mod tests {
     #[test]
     fn entry_from_list_entry_dir() {
         let le = list_dir("subdir");
-        let e: Entry = (&le).into();
+        let e = Entry::try_from(&le).unwrap();
         assert_eq!(e.path, "subdir");
         assert!(e.info.is_none());
         assert_eq!(e.local_path, None);
     }
 
     #[test]
+    fn entry_from_list_entry_file_missing_size_errors() {
+        let mut le = list_file("a.txt", 42, "deadbeef");
+        le.size = None;
+        assert!(Entry::try_from(&le).is_err());
+    }
+
+    #[test]
+    fn entry_from_list_entry_file_missing_sha1_errors() {
+        let mut le = list_file("a.txt", 42, "deadbeef");
+        le.sha1_hash = None;
+        assert!(Entry::try_from(&le).is_err());
+    }
+
+    #[test]
     fn entry_is_file() {
-        let f: Entry = (&list_file("x", 1, "h")).into();
-        let d: Entry = (&list_dir("d")).into();
+        let f = Entry::try_from(&list_file("x", 1, "h")).unwrap();
+        let d = Entry::try_from(&list_dir("d")).unwrap();
         assert!(f.is_file());
         assert!(!d.is_file());
     }
 
     #[test]
     fn entry_is_same() {
-        let a: Entry = (&list_file("a", 1, "hash")).into();
-        let b: Entry = (&list_file("a", 1, "hash")).into();
-        let c: Entry = (&list_file("a", 1, "other")).into();
-        let d1: Entry = (&list_dir("d")).into();
-        let d2: Entry = (&list_dir("d")).into();
+        let a = Entry::try_from(&list_file("a", 1, "hash")).unwrap();
+        let b = Entry::try_from(&list_file("a", 1, "hash")).unwrap();
+        let c = Entry::try_from(&list_file("a", 1, "other")).unwrap();
+        let d1 = Entry::try_from(&list_dir("d")).unwrap();
+        let d2 = Entry::try_from(&list_dir("d")).unwrap();
         assert!(a.is_same(&b));
         assert!(!a.is_same(&c));
         assert!(d1.is_same(&d2)); // dir vs dir: both info==None
@@ -280,14 +307,21 @@ mod tests {
             list_file("a.txt", 2, "h2"),
             list_file("dir/inside", 3, "h3"),
         ];
-        let tree = remote_tree(&unsorted);
+        let tree = remote_tree(&unsorted).unwrap();
         let paths: Vec<_> = tree.iter().map(|e| e.path.as_str()).collect();
         assert_eq!(paths, vec!["a.txt", "dir", "dir/inside", "z.txt"]);
     }
 
     #[test]
     fn remote_tree_empty() {
-        let tree = remote_tree(&[]);
+        let tree = remote_tree(&[]).unwrap();
         assert!(tree.is_empty());
+    }
+
+    #[test]
+    fn remote_tree_propagates_malformed_entry_error() {
+        let mut malformed = list_file("a.txt", 1, "h");
+        malformed.size = None;
+        assert!(remote_tree(&[malformed]).is_err());
     }
 }

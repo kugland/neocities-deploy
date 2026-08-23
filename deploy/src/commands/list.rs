@@ -33,7 +33,7 @@ pub fn list(params: &Params) -> Result<()> {
                 Err(e)
             }
         })?;
-        let remote = trees::remote_tree(&list);
+        let remote = trees::remote_tree(&list)?;
         for entry in remote {
             let (size, path) = if let Some(info) = entry.info {
                 (format!("{}", ByteSize(info.size)), entry.path)
