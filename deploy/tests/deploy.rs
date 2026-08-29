@@ -297,11 +297,9 @@ fn test_deploy_without_ignore_errors_aborts_on_action_failure() {
     #[allow(deprecated)]
     let mut cmd = Command::cargo_bin(env!("CARGO_PKG_NAME")).unwrap();
     cmd.arg("deploy").arg("--config").arg(config.path());
-    cmd.assert()
-        .failure()
-        .stderr(predicates::str::contains(
-            "API error: bad file (invalid_file_type)",
-        ));
+    cmd.assert().failure().stderr(predicates::str::contains(
+        "API error: bad file (invalid_file_type)",
+    ));
 
     list_mock.assert();
     upload_mock.assert();

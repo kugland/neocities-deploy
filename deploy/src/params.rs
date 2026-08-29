@@ -279,7 +279,11 @@ mod tests {
 
     #[test]
     fn build_client_with_valid_proxy_succeeds() {
-        assert!(make_site(Some("http://localhost:8080")).build_client().is_ok());
+        assert!(
+            make_site(Some("http://localhost:8080"))
+                .build_client()
+                .is_ok()
+        );
     }
 
     #[test]
