@@ -1184,7 +1184,7 @@ dependencies = [
 
 [[package]]
 name = "neocities-client"
-version = "0.1.24"
+version = "0.1.25"
 dependencies = [
  "base64 0.23.1",
  "derive_builder",
@@ -1203,7 +1203,7 @@ dependencies = [
 
 [[package]]
 name = "neocities-deploy"
-version = "0.1.24"
+version = "0.1.25"
 dependencies = [
  "anyhow",
  "assert_cmd",
