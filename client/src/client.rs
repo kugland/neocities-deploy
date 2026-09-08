@@ -77,6 +77,7 @@ const ALLOWED_EXTS_FOR_FREE_ACCOUNTS: &[&str] = &[
     "pgp",
     "pls",
     "png",
+    "pub",
     "rdf",
     "resolveHandle",
     "rss",
