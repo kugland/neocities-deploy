@@ -25,6 +25,19 @@ use std::{fs, io};
 
 const NEOCITIES_IGNORE: &str = ".neocitiesignore";
 
+struct Sha1Writer(Sha1);
+
+impl io::Write for Sha1Writer {
+    fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
+        self.0.update(buf);
+        Ok(buf.len())
+    }
+
+    fn flush(&mut self) -> io::Result<()> {
+        Ok(())
+    }
+}
+
 #[derive(Debug, Clone, PartialEq)]
 pub struct Entry {
     /// Path of the entry, relative to the root of the tree.
@@ -74,21 +87,10 @@ impl Entry {
         let info = if !metadata.is_dir() {
             let size = metadata.len();
             let sha1_sum = {
-                let mut hasher = Sha1::new();
+                let mut hasher = Sha1Writer(Sha1::new());
                 let mut file = fs::File::open(entry.path())?;
-                let mut buffer = [0; 8192];
-                loop {
-                    let bytes_read = io::Read::read(&mut file, &mut buffer)?;
-                    if bytes_read == 0 {
-                        break;
-                    }
-                    hasher.update(&buffer[..bytes_read]);
-                }
-                hasher
-                    .finalize()
-                    .iter()
-                    .map(|byte| format!("{byte:02x}"))
-                    .collect()
+                io::copy(&mut file, &mut hasher)?;
+                hex::encode(hasher.0.finalize())
             };
             Some(FileInfo { size, sha1_sum })
         } else {
