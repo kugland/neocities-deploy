@@ -20,23 +20,10 @@ use anyhow::{Result, anyhow};
 use itertools::Itertools;
 use neocities_client::{Client, response::ListEntry};
 use sha1::{Digest, Sha1};
+use std::fs;
 use std::path::{MAIN_SEPARATOR, Path, PathBuf};
-use std::{fs, io};
 
 const NEOCITIES_IGNORE: &str = ".neocitiesignore";
-
-struct Sha1Writer(Sha1);
-
-impl io::Write for Sha1Writer {
-    fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
-        self.0.update(buf);
-        Ok(buf.len())
-    }
-
-    fn flush(&mut self) -> io::Result<()> {
-        Ok(())
-    }
-}
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Entry {
@@ -87,10 +74,8 @@ impl Entry {
         let info = if !metadata.is_dir() {
             let size = metadata.len();
             let sha1_sum = {
-                let mut hasher = Sha1Writer(Sha1::new());
-                let mut file = fs::File::open(entry.path())?;
-                io::copy(&mut file, &mut hasher)?;
-                hex::encode(hasher.0.finalize())
+                let contents = fs::read(entry.path())?;
+                hex::encode(Sha1::digest(contents))
             };
             Some(FileInfo { size, sha1_sum })
         } else {
