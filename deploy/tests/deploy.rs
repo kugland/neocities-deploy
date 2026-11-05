@@ -25,9 +25,7 @@ use std::{env, fs};
 mod common;
 
 fn sha1_hex(s: &[u8]) -> String {
-    let mut hasher = Sha1::new();
-    hasher.update(s);
-    format!("{:x}", hasher.finalize())
+    hex::encode(Sha1::digest(s))
 }
 
 #[test]
