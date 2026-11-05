@@ -76,8 +76,19 @@ impl Entry {
             let sha1_sum = {
                 let mut hasher = Sha1::new();
                 let mut file = fs::File::open(entry.path())?;
-                io::copy(&mut file, &mut hasher)?;
-                format!("{:x}", hasher.finalize())
+                let mut buffer = [0; 8192];
+                loop {
+                    let bytes_read = io::Read::read(&mut file, &mut buffer)?;
+                    if bytes_read == 0 {
+                        break;
+                    }
+                    hasher.update(&buffer[..bytes_read]);
+                }
+                hasher
+                    .finalize()
+                    .iter()
+                    .map(|byte| format!("{byte:02x}"))
+                    .collect()
             };
             Some(FileInfo { size, sha1_sum })
         } else {
