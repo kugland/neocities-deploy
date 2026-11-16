@@ -4,7 +4,6 @@ description = "Another client for the Neocities API"
 readme = "README.md"
 authors.workspace = true
 edition.workspace = true
-homepage.workspace = true
 license.workspace = true
 repository.workspace = true
 rust-version.workspace = true
