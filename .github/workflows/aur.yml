@@ -83,6 +83,13 @@ jobs:
 
       - name: Commit to this repository
         run: |
-          git add .
-          git commit -m "Updated AUR packages to version" || echo "No changes to commit" \
-            && git push origin HEAD:master
+          git add aur
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          git commit -m "Updated AUR packages to version"
+          # On release events HEAD is the tag, which may be behind master
+          git fetch origin master
+          git rebase origin/master
+          git push origin HEAD:master
