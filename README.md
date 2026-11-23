@@ -4,8 +4,6 @@
 [![Codeberg Version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fcodeberg.org%2Fapi%2Fv1%2Frepos%2Fkugland%2Fneocities-deploy%2Ftags%3Flimit%3D1&query=%24%5B0%5D.name&label=Codeberg&logo=codeberg)](https://codeberg.org/kugland/neocities-deploy/tags)
 [![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/kugland/neocities-deploy/.github%2Fworkflows%2Fci.yml)](https://github.com/kugland/neocities-deploy/actions/workflows/ci.yml)
 [![Deps.rs Repository Dependencies](https://img.shields.io/deps-rs/repo/github/kugland/neocities-deploy)](https://deps.rs/repo/github/kugland/neocities-deploy)
-[![Crates.io Version](https://img.shields.io/crates/v/neocities-client)](https://crates.io/crates/neocities-client)
-[![MSRV](https://img.shields.io/badge/dynamic/toml?url=https%3A%2F%2Fraw.githubusercontent.com%2Fkugland%2Fneocities-deploy%2Fmaster%2FCargo.toml&query=%24.workspace.package%5B%27rust-version%27%5D&label=MSRV)](./Cargo.toml)
 [![AUR Version](https://img.shields.io/aur/version/neocities-deploy)](https://aur.archlinux.org/packages/neocities-deploy)
 [![License](https://img.shields.io/github/license/kugland/neocities-deploy)](./LICENSE)
 
