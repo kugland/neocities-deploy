@@ -2,6 +2,8 @@
 
 [![Crates.io Version](https://img.shields.io/crates/v/neocities-client)](https://crates.io/crates/neocities-client)
 [![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/kugland/neocities-deploy/.github%2Fworkflows%2Fci.yml)](https://github.com/kugland/neocities-deploy/actions/workflows/ci.yml)
+[![Deps.rs Crate Dependencies](https://img.shields.io/deps-rs/neocities-client/latest)](https://deps.rs/crate/neocities-client)
+[![Crates.io MSRV](https://img.shields.io/crates/msrv/neocities-client)](https://crates.io/crates/neocities-client)
 [![License](https://img.shields.io/crates/l/neocities-client)](../LICENSE)
 
 ---
