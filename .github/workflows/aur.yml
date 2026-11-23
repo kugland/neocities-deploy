@@ -88,7 +88,8 @@ jobs:
             echo "No changes to commit"
             exit 0
           fi
-          git commit -m "Updated AUR packages to version"
+          VERSION="$(sed -n 's/^pkgver=//p' aur/neocities-deploy/PKGBUILD)"
+          git commit -m "chore(aur): update aur packages to version $VERSION"
           # On release events HEAD is the tag, which may be behind master
           git fetch origin master
           git rebase origin/master
