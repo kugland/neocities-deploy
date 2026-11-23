@@ -17,7 +17,35 @@ env:
   RUST_BACKTRACE: 1
 
 jobs:
+  # A tagged commit pushed to a branch triggers two runs; keep only the tag run.
+  dedupe:
+    name: "Dedupe branch/tag runs"
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+    outputs:
+      skip: ${{ steps.tagged.outputs.skip }}
+    steps:
+      - id: tagged # Branch run: skip if the commit already has a release tag (same shape as the v*.*.* trigger).
+        if: startsWith(github.ref, 'refs/heads/')
+        run: grep -qE "^$GITHUB_SHA\s+refs/tags/v[^/]*\.[^/]*\.[^/]*$" <<< "$(git ls-remote --tags "https://github.com/$GH_REPO")" && echo skip=true >> "$GITHUB_OUTPUT" || true
+      - if: startsWith(github.ref, 'refs/tags/') # Tag run: cancel, then delete, branch runs already underway.
+        continue-on-error: true
+        timeout-minutes: 10
+        run: |
+          for id in $(gh run list -w ci.yml -c "$GITHUB_SHA" -e push --json databaseId,headBranch,status \
+                        -q '.[] | select(.status != "completed" and (.headBranch | IN("master", "devel"))) | .databaseId'); do
+            gh run cancel "$id" || true
+            until [[ "$(gh run view "$id" --json status -q .status)" == completed ]]; do sleep 5; done
+            gh run delete "$id" # Removes the cancelled run's checks from the commit.
+          done
+
   sanity-checks:
+    needs: dedupe
+    if: ${{ !cancelled() && needs.dedupe.outputs.skip != 'true' }}
     name: "Sanity Checks"
     runs-on: ubuntu-latest
     permissions:
