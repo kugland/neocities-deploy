@@ -1,0 +1,4 @@
+[env]
+# Keep C code (ring) at the x86-64 baseline in release builds, even when the
+# host gcc defaults higher (e.g. Ubuntu amd64v3 images, RHEL 10).
+CFLAGS_x86_64_unknown_linux_musl = "-march=x86-64 -mtune=generic"
