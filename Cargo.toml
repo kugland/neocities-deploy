@@ -8,7 +8,7 @@ resolver = "2"
 [workspace.package]
 authors = ["André Kugland <kugland@gmail.com>"]
 repository = "https://github.com/kugland/neocities-deploy"
-version = "0.1.28"
+version = "0.1.29"
 edition = "2024"
 license = "GPL-3.0"
 rust-version = "1.88.0"
